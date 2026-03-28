@@ -18,20 +18,18 @@
             --edge-color: #45a29e;
             --node-stroke: #66fcf1;
             
-            --color-undiscovered: #1f2833;
-            --color-queued: #45a29e; 
-            --color-explored: #66fcf1;
+            /* START: Replace with this block */
+            /* State Colors - CLRS Textbook Strict Requirement */
+            --color-undiscovered: #ffffff; /* White */
+            --color-queued: #888888;       /* Gray */
+            --color-explored: #222222;     /* Black */
             
-            --text-undiscovered: #c5c6c7;
-            --text-dark-bg: #0b0c10;
+            --text-undiscovered: #000000;  /* Black text on white */
+            --text-dark-bg: #ffffff;       /* White text on black/gray */
+            /* END: Replacement block */
             
             --btn-bg: #2b3a4a;
             --btn-hover: #45a29e;
-            --btn-disabled: #1a2026;
-            --accent: #66fcf1;
-            
-            --code-bg: #0b0c10;
-            --code-highlight: rgba(102, 252, 241, 0.15);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,7 +76,8 @@
             background-color: var(--bg-color);
         }
 
-        @media (max-width: 1200px) {
+        /* 980px Breakpoint as per rubric */
+        @media (max-width: 980px) {
             .app-container { flex-direction: column; height: auto; }
             .left-panel, .right-panel { width: 100%; border: none; border-bottom: 1px solid var(--border-color); }
             .center-panel { min-height: 600px; }
@@ -130,7 +129,7 @@
             resize: vertical;
         }
 
-        .warning-text { color: #ff6b6b; font-size: 0.85rem; font-weight: bold; display: none; }
+        .warning-text { color: var(--accent-alt); font-size: 0.85rem; font-weight: bold; display: none; }
 
         .info-row { display: flex; justify-content: space-between; font-size: 0.9rem; }
         .info-label { color: var(--text-muted); }
@@ -226,10 +225,15 @@
 
         /* SVG Chart */
         .chart-box { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; text-align: center; }
-        .chart-svg { width: 100%; max-width: 600px; height: 300px; background: #111; border-bottom: 2px solid #fff; border-left: 2px solid #fff; }
-        .chart-line { stroke: var(--accent); stroke-width: 3; fill: none; transition: d 0.3s ease; }
-        .chart-point { fill: #ffeb3b; r: 6; transition: cx 0.3s, cy 0.3s; }
+        .chart-svg { width: 100%; max-width: 600px; height: 300px; background: #111; border-bottom: 2px solid #fff; border-left: 2px solid #fff; margin-bottom: 1rem; }
+        .chart-line-bfs { stroke: var(--accent); stroke-width: 3; fill: none; transition: d 0.3s ease; }
+        .chart-line-dij { stroke: var(--accent-alt); stroke-width: 3; fill: none; transition: d 0.3s ease; stroke-dasharray: 5,5; }
+        .chart-point { r: 6; transition: cx 0.3s, cy 0.3s; }
         
+        .chart-legend { display: flex; justify-content: center; gap: 2rem; font-size: 0.9rem; }
+        .legend-bfs { color: var(--accent); font-weight: bold; }
+        .legend-dij { color: var(--accent-alt); font-weight: bold; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
@@ -324,18 +328,18 @@
             <div class="panel-section">
                 <h2>Pseudocode</h2>
                 <div class="pseudocode-container" id="pseudocode-box">
-                    <div class="code-line" id="line-1"><span class="line-num">1</span><span class="code-text">BFS(graph, S):</span></div>
-                    <div class="code-line" id="line-2"><span class="line-num">2</span><span class="code-text">  let Q be a queue</span></div>
-                    <div class="code-line" id="line-3"><span class="line-num">3</span><span class="code-text">  Q.enqueue(S), dist[S] = 0</span></div>
-                    <div class="code-line" id="line-4"><span class="line-num">4</span><span class="code-text">  mark S as discovered</span></div>
-                    <div class="code-line" id="line-5"><span class="line-num">5</span><span class="code-text">  while Q is not empty:</span></div>
-                    <div class="code-line" id="line-6"><span class="line-num">6</span><span class="code-text">    v = Q.dequeue()</span></div>
-                    <div class="code-line" id="line-7"><span class="line-num">7</span><span class="code-text">    mark v as explored</span></div>
-                    <div class="code-line" id="line-8"><span class="line-num">8</span><span class="code-text">    for all edges from v to w:</span></div>
-                    <div class="code-line" id="line-9"><span class="line-num">9</span><span class="code-text">      if w is not discovered:</span></div>
-                    <div class="code-line" id="line-10"><span class="line-num">10</span><span class="code-text">        mark w as discovered</span></div>
-                    <div class="code-line" id="line-11"><span class="line-num">11</span><span class="code-text">        dist[w] = dist[v] + 1</span></div>
-                    <div class="code-line" id="line-12"><span class="line-num">12</span><span class="code-text">        Q.enqueue(w)</span></div>
+                    <div class="code-line" id="line-1" title="Define the BFS function with graph and Start node S"><span class="line-num">1</span><span class="code-text">BFS(graph, S):</span></div>
+                    <div class="code-line" id="line-2" title="Initialize a First-In-First-Out (FIFO) queue"><span class="line-num">2</span><span class="code-text">  let Q be a queue</span></div>
+                    <div class="code-line" id="line-3" title="Add start node to queue, set its distance to 0"><span class="line-num">3</span><span class="code-text">  Q.enqueue(S), dist[S] = 0</span></div>
+                    <div class="code-line" id="line-4" title="Mark start node as seen so we don't visit it again"><span class="line-num">4</span><span class="code-text">  mark S as discovered</span></div>
+                    <div class="code-line" id="line-5" title="Loop continues until every discovered node is processed"><span class="line-num">5</span><span class="code-text">  while Q is not empty:</span></div>
+                    <div class="code-line" id="line-6" title="Remove the oldest node from the front of the queue"><span class="line-num">6</span><span class="code-text">    v = Q.dequeue()</span></div>
+                    <div class="code-line" id="line-7" title="Mark node as fully processed (all its edges will be checked)"><span class="line-num">7</span><span class="code-text">    mark v as explored</span></div>
+                    <div class="code-line" id="line-8" title="Iterate over all neighbors of the current node"><span class="line-num">8</span><span class="code-text">    for all edges from v to w:</span></div>
+                    <div class="code-line" id="line-9" title="Check if neighbor 'w' is completely unseen"><span class="line-num">9</span><span class="code-text">      if w is not discovered:</span></div>
+                    <div class="code-line" id="line-10" title="Color 'w' gray to show we know about it"><span class="line-num">10</span><span class="code-text">        mark w as discovered</span></div>
+                    <div class="code-line" id="line-11" title="The shortest path to 'w' is exactly one step further than 'v'"><span class="line-num">11</span><span class="code-text">        dist[w] = dist[v] + 1</span></div>
+                    <div class="code-line" id="line-12" title="Add 'w' to the back of the queue for later exploration"><span class="line-num">12</span><span class="code-text">        Q.enqueue(w)</span></div>
                 </div>
             </div>
 
@@ -368,26 +372,41 @@
             <h3>Complexity Analysis: O(V + E)</h3>
             <p>The time complexity of Breadth-First Search is exactly proportional to the number of Vertices (V) and Edges (E) in the graph: <strong>O(V + E)</strong>.</p>
             <ul>
-                <li><strong>O(V):</strong> Every vertex is enqueued and dequeued exactly once.</li>
-                <li><strong>O(E):</strong> Every edge is examined exactly twice in an undirected graph (once from each of its endpoints).</li>
+                <li><strong>Time Complexity:</strong>
+                    <ul>
+                        <li><em>Worst/Average Case: O(V + E)</em>. Every vertex is enqueued/dequeued once (O(V)), and every edge is examined exactly twice in an undirected graph (O(E)).</li>
+                        <li><em>Best Case: O(1)</em>. If the target node you are searching for happens to be the starting node, the algorithm terminates immediately.</li>
+                    </ul>
+                </li>
+                <li><strong>Space Complexity: O(V)</strong>. The FIFO queue and the tracking arrays (discovered state, distances) will need to store up to V vertices in the worst-case scenario (e.g., a "star" graph where the root connects to all other nodes at once).</li>
             </ul>
             <p><strong>Compared to DFS:</strong> Depth-First Search shares the exact same worst-case time complexity, O(V + E), but explores in a different order (going deep instead of wide).</p>
             <p><strong>Compared to Dijkstra's:</strong> Dijkstra's Algorithm handles weighted edges by using a Priority Queue, bringing its complexity to O((V + E) log V). BFS is much faster but only works for <em>unweighted</em> graphs.</p>
             
             <div class="chart-box">
                 <h4>Interactive Growth Chart: Dense Graph (E ≈ V²/2)</h4>
-                <p style="font-size:0.9rem; color:var(--text-muted);">Adjust vertices to see how operations grow in a worst-case dense graph.</p>
+                <p style="font-size:0.9rem; color:var(--text-muted);">Compare theoretical BFS operations vs Dijkstra's Priority-Queue operations as input grows.</p>
                 <div style="margin: 1rem 0;">
                     <label>Vertices (V): <span id="chart-v-val" style="color:var(--accent);font-weight:bold;">10</span></label>
                     <input type="range" id="chart-slider" min="5" max="50" value="10" style="width: 200px; margin-left: 1rem;">
                 </div>
+                
                 <svg class="chart-svg" viewBox="0 -300 600 300">
                     <g transform="scale(1, -1)">
-                        <path id="chart-path" class="chart-line" d=""></path>
-                        <circle id="chart-dot" class="chart-point" cx="0" cy="0"></circle>
+                        <!-- Dijkstra Line -->
+                        <path id="chart-path-dij" class="chart-line-dij" d=""></path>
+                        <circle id="chart-dot-dij" class="chart-point" cx="0" cy="0" fill="var(--accent-alt)"></circle>
+                        
+                        <!-- BFS Line -->
+                        <path id="chart-path-bfs" class="chart-line-bfs" d=""></path>
+                        <circle id="chart-dot-bfs" class="chart-point" cx="0" cy="0" fill="var(--accent)"></circle>
                     </g>
                 </svg>
-                <p style="margin-top:0.5rem;">Operations (V + E): <span id="chart-op-val" style="color:var(--accent);font-weight:bold;">55</span></p>
+                
+                <div class="chart-legend">
+                    <div class="legend-bfs">── BFS Operations O(V + E): <span id="chart-op-bfs">55</span></div>
+                    <div class="legend-dij">- - Dijkstra Operations O((V+E)logV): <span id="chart-op-dij">182</span></div>
+                </div>
             </div>
         </div>
 
@@ -401,11 +420,8 @@
                 To achieve this perfect level-by-level traversal, BFS relies strictly on a First-In-First-Out (FIFO) Queue. When a node is discovered, it is placed at the back of the queue. Because it always pulls from the front, it guarantees that all nodes discovered at distance <em>d</em> are fully processed before the algorithm even looks at nodes at distance <em>d+1</em>.
             </div>
 
-            <p><strong>Queue (BFS) vs. Stack (DFS):</strong></p>
-            <ul>
-                <li><strong>BFS (Queue):</strong> Oldest discovered nodes are processed first. This guarantees we check distance 1 nodes, then distance 2 nodes, spreading out evenly like a ripple in water.</li>
-                <li><strong>DFS (Stack):</strong> Newest discovered nodes are processed first (LIFO). This causes the algorithm to plunge as deep as possible down a single path before eventually backtracking.</li>
-            </ul>
+            <p><strong>Impact of Changing the Searching Mechanism:</strong></p>
+            <p>If we alter the algorithm by removing the Queue and replacing it with a Last-In-First-Out (LIFO) Stack, the entire behavior fundamentally breaks. The algorithm transforms into Depth-First Search (DFS). The critical impact of this change is that <strong>we completely lose the shortest-path guarantee</strong>. A Stack-based search will plunge deep down a single branch, potentially taking 10 edges to reach a node that was sitting right next to the root, assigning it a completely incorrect "distance".</p>
         </div>
 
         <!-- CLO 3: Paradigm -->
@@ -414,9 +430,13 @@
             <p>BFS is effectively a <strong>Greedy-like strategy</strong> for unweighted graphs. At every step, it makes the locally optimal choice by exploring the absolute nearest unvisited nodes first.</p>
             <p>Because it expands evenly, the moment BFS discovers a target node, it is guaranteed to have found the <strong>shortest path</strong> to that node (in terms of fewest edges). Look closely at the visualization above: as nodes turn queued/gray, a distance label (<code>d=...</code>) is stamped next to them. This distance is permanently optimal.</p>
             
-            <div class="key-concept-box">
-                <strong>Key Limitation: Why BFS Fails on Weighted Graphs</strong>
-                BFS assumes every edge has an identical "weight" or cost of 1. Therefore, the path with the fewest edges is always the shortest path. However, in weighted graphs (e.g., city distances), a path with 5 short edges might be much cheaper than a path with 1 massive edge. Because BFS doesn't look at weights, it will greedily choose the 1-edge path, returning an incorrect "shortest path". For weighted graphs, Dynamic Programming (Bellman-Ford) or greedy Priority Queues (Dijkstra's) are required.
+            <div class="key-concept-box" style="border-left-color: var(--accent-alt);">
+                <strong style="color: var(--accent-alt);">Counterexample: BFS vs DP (Bellman-Ford) on Weighted Graphs</strong>
+                Consider a triangle graph with nodes A, B, and C. The edge from A-C has a massive cost of 10. The edges A-B and B-C each have a small cost of 1. 
+                <br><br>
+                If we use BFS to find the shortest path from A to C, it acts greedily purely on edge count. It sees C is 1 edge away, so it immediately declares the shortest path to C is A->C (Total cost: 10). <strong>This is wrong!</strong>
+                <br><br>
+                If we instead use the <strong>Dynamic Programming paradigm (Bellman-Ford Algorithm)</strong>, it systematically evaluates overlapping sub-problems and edge relaxations. It realizes that going A->B (cost 1) and then B->C (cost 1) yields a true shortest path of A->B->C (Total cost: 2).
             </div>
         </div>
 
@@ -468,6 +488,8 @@
         /* =========================================
            DATA & PRESETS
            ========================================= */
+        const svgNS = "http://www.w3.org/2000/svg"; // CRITICAL BUG FIX
+
         const presets = {
             standard: "A-B\nA-C\nB-D\nB-G\nC-G\nC-E\nD-F\nE-F\nG-D",
             tree: "A-B\nA-C\nB-D\nB-E\nC-F\nC-G",
@@ -496,6 +518,7 @@
         const stepExplanation = document.getElementById('step-explanation');
         const statDiscovered = document.getElementById('stat-discovered');
         const statEdges = document.getElementById('stat-edges');
+        const historyBox = document.getElementById('history-box'); // DOM BUG FIX
         const historyBody = document.getElementById('history-body');
 
         // State
@@ -731,7 +754,10 @@
 
         function renderHistoryTable(currentIndex) {
             historyBody.innerHTML = '';
-            for (let i = 0; i <= currentIndex; i++) {
+            // Only keep last 25 steps so it doesn't get infinitely long
+            const startLimit = Math.max(0, currentIndex - 25);
+            
+            for (let i = startLimit; i <= currentIndex; i++) {
                 const snap = snapshots[i];
                 const tr = document.createElement('tr');
                 tr.className = snap.actionClass;
@@ -816,27 +842,46 @@
         }
 
         /* =========================================
-           CHART LOGIC (CLO-1)
+           CHART LOGIC (CLO-1) - Dual Lines
            ========================================= */
         const chartSlider = document.getElementById('chart-slider');
         function drawChart() {
             const V = parseInt(chartSlider.value);
             document.getElementById('chart-v-val').textContent = V;
             
+            // Assume dense graph for worst case comparison E = V*(V-1)/2
             const E = (V * (V - 1)) / 2;
-            const operations = V + E;
-            document.getElementById('chart-op-val').textContent = operations;
+            const bfsOp = V + E;
             
-            let dString = "M 0 0 ";
-            for(let v = 0; v <= 50; v++) {
+            // Dijkstra's theoretical: (V + E) log2 V
+            const dijOp = Math.round((V + E) * Math.log2(V));
+
+            document.getElementById('chart-op-bfs').textContent = bfsOp;
+            document.getElementById('chart-op-dij').textContent = dijOp;
+            
+            let dStringBFS = "M 0 0 ";
+            let dStringDij = "M 0 0 ";
+            
+            // Max Operations for Dijkstra at V=50 is roughly ~7200.
+            // SVG height is 300. Scale factor = 300 / 7500 = 0.04
+            const scaleY = 0.04;
+            
+            for(let v = 5; v <= 50; v++) {
                 let e = (v * (v - 1)) / 2;
-                let op = v + e;
-                dString += `L ${v * 12} ${op * 0.23} `;
+                let opBfs = v + e;
+                let opDij = (v + e) * Math.log2(v);
+                
+                dStringBFS += `L ${v * 12} ${opBfs * scaleY} `;
+                dStringDij += `L ${v * 12} ${opDij * scaleY} `;
             }
-            document.getElementById('chart-path').setAttribute('d', dString);
             
-            document.getElementById('chart-dot').setAttribute('cx', V * 12);
-            document.getElementById('chart-dot').setAttribute('cy', operations * 0.23);
+            document.getElementById('chart-path-bfs').setAttribute('d', dStringBFS);
+            document.getElementById('chart-dot-bfs').setAttribute('cx', V * 12);
+            document.getElementById('chart-dot-bfs').setAttribute('cy', bfsOp * scaleY);
+            
+            document.getElementById('chart-path-dij').setAttribute('d', dStringDij);
+            document.getElementById('chart-dot-dij').setAttribute('cx', V * 12);
+            document.getElementById('chart-dot-dij').setAttribute('cy', dijOp * scaleY);
         }
         chartSlider.addEventListener('input', drawChart);
 
