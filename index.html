@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFS Visualization</title>
+    <style>
+        /* =========================================
+           CSS Custom Properties & Reset
+           ========================================= */
+        :root {
+            /* Layout & Theme Colors */
+            --bg-color: #121212;
+            --panel-bg: #1e1e24;
+            --border-color: #333333;
+            --text-main: #f5f5f5;
+            --text-muted: #aaaaaa;
+            
+            /* Graph Colors */
+            --edge-color: #444444;
+            --node-stroke: #555555;
+            
+            /* Node State Colors */
+            --color-undiscovered: #ffffff;
+            --color-queued: #8892b0; /* A soft, visible gray/slate */
+            --color-explored: #222222;
+            
+            /* Text Colors based on State */
+            --text-undiscovered: #121212;
+            --text-dark-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* =========================================
+           Layout Framework
+           ========================================= */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Control Panel (Left Column) */
+        .control-panel {
+            width: 420px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Visualization Area (Right Column) */
+        .visualization-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Responsive Breakpoint */
+        @media (max-width: 980px) {
+            body {
+                overflow: auto;
+            }
+            .app-container {
+                flex-direction: column;
+            }
+            .control-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                height: auto;
+            }
+            .visualization-area {
+                min-height: 500px;
+            }
+        }
+
+        /* =========================================
+           Legend Styles
+           ========================================= */
+        .legend-container {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .legend-container h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 12px;
+            border: 2px solid var(--node-stroke);
+        }
+
+        .color-undiscovered { background-color: var(--color-undiscovered); }
+        .color-queued { background-color: var(--color-queued); }
+        .color-explored { background-color: var(--color-explored); border-color: #555; }
+
+        /* =========================================
+           SVG Graph Styles
+           ========================================= */
+        svg {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            /* Give it a slight background to define the canvas visually if desired */
+        }
+
+        /* Edges */
+        .edge {
+            stroke: var(--edge-color);
+            stroke-width: 4px;
+            transition: stroke 0.3s ease;
+        }
+
+        /* Nodes Base */
+        .node {
+            cursor: default;
+        }
+
+        .node circle {
+            r: 25px;
+            stroke-width: 3px;
+            transition: fill 0.4s ease, stroke 0.4s ease;
+        }
+
+        .node text {
+            font-size: 16px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none; /* Text shouldn't block mouse events */
+            transition: fill 0.4s ease;
+        }
+
+        /* Node States */
+        .node-undiscovered circle {
+            fill: var(--color-undiscovered);
+            stroke: var(--node-stroke);
+        }
+        .node-undiscovered text {
+            fill: var(--text-undiscovered);
+        }
+
+        .node-queued circle {
+            fill: var(--color-queued);
+            stroke: var(--node-stroke);
+        }
+        .node-queued text {
+            fill: var(--text-dark-bg);
+        }
+
+        .node-explored circle {
+            fill: var(--color-explored);
+            stroke: var(--text-muted);
+        }
+        .node-explored text {
+            fill: var(--text-dark-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Control Panel -->
+        <aside class="control-panel">
+            <header>
+                <h1>BFS Visualization</h1>
+                <p>Breadth-First Search is an algorithm for searching tree or graph data structures. It explores all nodes at the present depth before moving on to the nodes at the next depth level.</p>
+            </header>
+
+            <!-- Status Legend -->
+            <div class="legend-container">
+                <h2>Node States</h2>
+                <div class="legend-item">
+                    <div class="legend-color color-undiscovered"></div>
+                    <span>Undiscovered (Not yet seen)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color color-queued"></div>
+                    <span>In Queue (Discovered, waiting to be explored)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color color-explored"></div>
+                    <span>Explored (Fully processed)</span>
+                </div>
+            </div>
+
+            <!-- Future controls will go here (Buttons, Output logs, etc.) -->
+            <div id="controls-container">
+                <!-- Placeholders ready for the next step -->
+            </div>
+        </aside>
+
+        <!-- Visualization Area -->
+        <main class="visualization-area">
+            <!-- Viewbox uses an 800x600 coordinate system to keep logic simple while auto-scaling -->
+            <svg id="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                <!-- Groups to ensure edges are drawn behind nodes -->
+                <g id="edges-layer"></g>
+                <g id="nodes-layer"></g>
+            </svg>
+        </main>
+    </div>
+
+    <script>
+        /**
+         * Graph Data Representation
+         * 7 Nodes forming a well-connected unweighted, undirected graph.
+         * Using an 800x600 grid for positioning.
+         */
+        const graphData = {
+            nodes: [
+                { id: 'A', x: 150, y: 300 },
+                { id: 'B', x: 300, y: 150 },
+                { id: 'C', x: 300, y: 450 },
+                { id: 'D', x: 450, y: 150 },
+                { id: 'E', x: 450, y: 450 },
+                { id: 'F', x: 650, y: 300 },
+                { id: 'G', x: 400, y: 300 }
+            ],
+            edges: [
+                { source: 'A', target: 'B' },
+                { source: 'A', target: 'C' },
+                { source: 'B', target: 'D' },
+                { source: 'B', target: 'G' },
+                { source: 'C', target: 'G' },
+                { source: 'C', target: 'E' },
+                { source: 'D', target: 'F' },
+                { source: 'E', target: 'F' },
+                { source: 'G', target: 'D' }
+            ]
+        };
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const edgesLayer = document.getElementById('edges-layer');
+        const nodesLayer = document.getElementById('nodes-layer');
+
+        /**
+         * Initializes and draws the static SVG graph based on graphData.
+         */
+        function renderGraph() {
+            // Create a lookup for node coordinates
+            const nodeLookup = {};
+            graphData.nodes.forEach(node => {
+                nodeLookup[node.id] = node;
+            });
+
+            // 1. Draw Edges first so they sit underneath nodes visually
+            graphData.edges.forEach(edge => {
+                const sourceNode = nodeLookup[edge.source];
+                const targetNode = nodeLookup[edge.target];
+
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('x1', sourceNode.x);
+                line.setAttribute('y1', sourceNode.y);
+                line.setAttribute('x2', targetNode.x);
+                line.setAttribute('y2', targetNode.y);
+                line.classList.add('edge');
+                
+                // Add an ID for potential future animations
+                line.setAttribute('id', `edge-${edge.source}-${edge.target}`);
+                
+                edgesLayer.appendChild(line);
+            });
+
+            // 2. Draw Nodes
+            graphData.nodes.forEach(node => {
+                const group = document.createElementNS(svgNS, 'g');
+                // Give each node an ID so we can easily target it in JS later for state changes
+                group.setAttribute('id', `node-${node.id}`);
+                // Start all nodes as "undiscovered"
+                group.classList.add('node', 'node-undiscovered');
+                // Translate the group to the node's (x, y)
+                group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+
+                const circle = document.createElementNS(svgNS, 'circle');
+                // Radius is managed via CSS
+
+                const text = document.createElementNS(svgNS, 'text');
+                text.textContent = node.id;
+                // Add dy slightly offset to visually center text within the circle perfectly
+                text.setAttribute('dy', '0.1em'); 
+
+                group.appendChild(circle);
+                group.appendChild(text);
+                nodesLayer.appendChild(group);
+            });
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGraph();
+        });
+
+    </script>
+</body>
+</html>
