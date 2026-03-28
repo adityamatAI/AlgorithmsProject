@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BFS Visualization</title>
+    <title>Interactive BFS Visualization</title>
     <style>
         /* =========================================
            CSS Custom Properties & Reset
@@ -29,13 +29,12 @@
             --btn-hover: #4e5577;
             --btn-disabled: #2a2d3d;
             --accent: #64ffda;
+            
+            --code-bg: #15161a;
+            --code-highlight: rgba(100, 255, 218, 0.15);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,7 +46,7 @@
         }
 
         /* =========================================
-           Layout Framework
+           Layout Framework (3 Columns)
            ========================================= */
         .app-container {
             display: flex;
@@ -55,156 +54,88 @@
             height: 100%;
         }
 
-        .control-panel {
-            width: 420px;
+        .left-panel, .right-panel {
+            width: 340px;
             background-color: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.2rem;
             overflow-y: auto;
+            padding: 1.5rem;
+            flex-shrink: 0;
         }
 
-        header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
+        .left-panel { border-right: 1px solid var(--border-color); }
+        .right-panel { border-left: 1px solid var(--border-color); }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .visualization-area {
+        .center-panel {
             flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+            flex-direction: column;
             position: relative;
             overflow: hidden;
+            background-color: var(--bg-color);
         }
 
-        @media (max-width: 980px) {
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) {
             body { overflow: auto; }
             .app-container { flex-direction: column; }
-            .control-panel {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-            .visualization-area { min-height: 500px; }
+            .left-panel, .right-panel { width: 100%; border: none; border-bottom: 1px solid var(--border-color); }
+            .center-panel { min-height: 600px; }
         }
 
         /* =========================================
-           Legend & Controls
+           Panel Sections & Controls
            ========================================= */
         .panel-section {
             background: rgba(0, 0, 0, 0.2);
-            padding: 1.2rem;
+            padding: 1rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
-        }
-
-        .panel-section h2 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--accent);
-        }
-
-        .legend-item {
             display: flex;
-            align-items: center;
-            margin-bottom: 0.8rem;
-            font-size: 0.9rem;
+            flex-direction: column;
+            gap: 0.8rem;
         }
-        .legend-item:last-child { margin-bottom: 0; }
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 2px solid var(--node-stroke);
-        }
-        .color-undiscovered { background-color: var(--color-undiscovered); }
-        .color-queued { background-color: var(--color-queued); }
-        .color-explored { background-color: var(--color-explored); border-color: #555; }
+
+        h1 { font-size: 1.5rem; color: var(--accent); }
+        h2 { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
         /* Buttons */
-        .btn-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
+        .btn-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
         button {
             flex: 1 1 calc(33% - 0.5rem);
-            background-color: var(--btn-bg);
-            color: #fff;
-            border: none;
-            padding: 0.6rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.85rem;
+            background-color: var(--btn-bg); color: #fff;
+            border: none; padding: 0.6rem; border-radius: 4px;
+            cursor: pointer; font-weight: bold; font-size: 0.85rem;
             transition: background 0.2s;
         }
         button:hover:not(:disabled) { background-color: var(--btn-hover); }
-        button:disabled {
-            background-color: var(--btn-disabled);
-            color: #666;
-            cursor: not-allowed;
-        }
+        button:disabled { background-color: var(--btn-disabled); color: #666; cursor: not-allowed; }
         #btn-build { flex: 1 1 100%; background-color: var(--accent); color: #000; }
         #btn-build:hover:not(:disabled) { background-color: #4edbb8; }
 
-        /* Sliders & Text Info */
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.95rem;
-            margin-bottom: 0.8rem;
-        }
+        /* Info Rows & Stats */
+        .info-row { display: flex; justify-content: space-between; font-size: 0.9rem; }
         .info-label { color: var(--text-muted); }
-        .info-value { font-weight: bold; }
-
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+        .info-value { font-weight: bold; color: var(--accent); }
+        
+        .slider-container { display: flex; align-items: center; gap: 1rem; }
         .slider-container input[type="range"] { flex: 1; }
 
-        /* Visual FIFO Queue */
+        /* Visual Queue */
         .queue-container {
-            display: flex;
-            gap: 0.5rem;
-            min-height: 40px;
-            align-items: center;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
+            display: flex; gap: 0.5rem; min-height: 40px;
+            align-items: center; overflow-x: auto; padding-bottom: 0.5rem;
         }
         .queue-item {
-            min-width: 35px;
-            height: 35px;
-            background-color: var(--color-queued);
-            color: var(--text-dark-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-weight: bold;
+            min-width: 35px; height: 35px; border-radius: 4px;
+            background-color: var(--color-queued); color: var(--text-dark-bg);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; border: 2px solid var(--text-muted);
             animation: popIn 0.3s ease forwards;
-            border: 2px solid var(--text-muted);
         }
-        .queue-empty {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-style: italic;
-        }
+        .queue-empty { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
 
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
@@ -212,80 +143,113 @@
         }
 
         /* =========================================
-           SVG Graph Styles
+           Center Panel: Visuals & Explanation
            ========================================= */
-        svg {
-            width: 100%;
-            height: 100%;
-            max-width: 800px;
-            max-height: 600px;
+        .step-explanation-box {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
         }
 
-        .edge {
-            stroke: var(--edge-color);
-            stroke-width: 4px;
-            transition: stroke 0.3s ease;
+        .visualization-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
 
-        .node circle {
-            r: 25px;
-            stroke-width: 3px;
-            /* Added 300ms transition as requested */
-            transition: fill 0.3s ease, stroke 0.3s ease;
-        }
-
-        .node text {
-            font-size: 16px;
-            font-weight: bold;
-            text-anchor: middle;
-            dominant-baseline: central;
-            pointer-events: none;
-            transition: fill 0.3s ease;
-        }
-
-        /* Node States */
+        svg { width: 100%; height: 100%; max-width: 800px; max-height: 600px; }
+        .edge { stroke: var(--edge-color); stroke-width: 4px; transition: stroke 0.3s ease; }
+        .node circle { r: 25px; stroke-width: 3px; transition: fill 0.3s ease, stroke 0.3s ease; }
+        .node text { font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill 0.3s ease; }
+        
         .node-undiscovered circle { fill: var(--color-undiscovered); stroke: var(--node-stroke); }
         .node-undiscovered text { fill: var(--text-undiscovered); }
-
         .node-queued circle { fill: var(--color-queued); stroke: var(--node-stroke); }
         .node-queued text { fill: var(--text-dark-bg); }
-
         .node-explored circle { fill: var(--color-explored); stroke: var(--text-muted); }
         .node-explored text { fill: var(--text-dark-bg); }
 
+        /* =========================================
+           Right Panel: Pseudocode & History
+           ========================================= */
+        .pseudocode-container {
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-line {
+            display: flex;
+            padding: 0.2rem 0.5rem;
+            cursor: help;
+            white-space: pre;
+            border-left: 3px solid transparent;
+            transition: background 0.2s;
+        }
+        
+        .code-line:hover { background-color: rgba(255,255,255,0.05); }
+        .line-num { color: #666; width: 25px; user-select: none; margin-right: 10px; text-align: right; }
+        .code-text { color: #ccc; }
+        
+        /* Highlight state for active pseudocode line */
+        .code-line.active-line {
+            background-color: var(--code-highlight);
+            border-left: 3px solid var(--accent);
+        }
+        .code-line.active-line .code-text { color: #fff; font-weight: bold; }
+
+        .history-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            min-height: 200px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--panel-bg); color: var(--text-muted); position: sticky; top: 0; }
+        tbody tr { cursor: pointer; transition: background 0.2s; }
+        tbody tr:hover { background-color: rgba(255,255,255,0.05); }
+        
+        /* Action color coding */
+        .hist-init { border-left: 3px solid #888; }
+        .hist-enqueue { border-left: 3px solid #4a90e2; }
+        .hist-dequeue { border-left: 3px solid #e74c3c; }
+        .hist-discover { border-left: 3px solid var(--color-queued); }
+        .hist-explore { border-left: 3px solid var(--accent); }
+
+        /* Highlight the currently active history row */
+        tr.active-history { background-color: rgba(100, 255, 218, 0.1); }
+        
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- Control Panel -->
-        <aside class="control-panel">
-            <header>
-                <h1>BFS Visualization</h1>
-                <p>Breadth-First Search explores graph nodes level by level using a FIFO (First-In-First-Out) queue.</p>
-            </header>
-
-            <!-- Status Legend -->
-            <div class="panel-section">
-                <h2>Node States</h2>
-                <div class="legend-item">
-                    <div class="legend-color color-undiscovered"></div>
-                    <span>Undiscovered (Not yet seen)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color color-queued"></div>
-                    <span>In Queue (Discovered, waiting)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color color-explored"></div>
-                    <span>Explored (Fully processed)</span>
-                </div>
+        <!-- Left Panel: Controls, Stats, Queue -->
+        <aside class="left-panel">
+            <div>
+                <h1>BFS Visualizer</h1>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">Breadth-First Search using a FIFO queue.</p>
             </div>
 
             <!-- Controls -->
             <div class="panel-section">
-                <h2>Controls</h2>
-                
+                <h2>Playback Controls</h2>
                 <div class="info-row">
                     <span class="info-label">Status:</span>
                     <span class="info-value" id="status-text">Idle</span>
@@ -296,7 +260,7 @@
                 </div>
 
                 <div class="btn-grid">
-                    <button id="btn-build">Build Steps</button>
+                    <button id="btn-build">Build Algorithm</button>
                     <button id="btn-step" disabled>Step</button>
                     <button id="btn-play" disabled>Play</button>
                     <button id="btn-pause" disabled>Pause</button>
@@ -310,8 +274,25 @@
                 </div>
             </div>
 
-            <!-- Visual Queue -->
+            <!-- Live Statistics -->
             <div class="panel-section">
+                <h2>Live Statistics</h2>
+                <div class="info-row">
+                    <span class="info-label">Nodes Discovered:</span>
+                    <span class="info-value" id="stat-discovered">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Edges Traversed:</span>
+                    <span class="info-value" id="stat-edges">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Queue Operations:</span>
+                    <span class="info-value" id="stat-queue">0</span>
+                </div>
+            </div>
+
+            <!-- Visual Queue -->
+            <div class="panel-section" style="flex:1;">
                 <h2>Current Queue (FIFO)</h2>
                 <div class="queue-container" id="visual-queue">
                     <span class="queue-empty">Queue is empty</span>
@@ -319,36 +300,75 @@
             </div>
         </aside>
 
-        <!-- Visualization Area -->
-        <main class="visualization-area">
-            <svg id="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-                <g id="edges-layer"></g>
-                <g id="nodes-layer"></g>
-            </svg>
+        <!-- Center Panel: Explanation & Graph -->
+        <main class="center-panel">
+            <div class="step-explanation-box" id="step-explanation">
+                Click "Build Algorithm" to initialize BFS.
+            </div>
+            <div class="visualization-area">
+                <svg id="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                    <g id="edges-layer"></g>
+                    <g id="nodes-layer"></g>
+                </svg>
+            </div>
         </main>
+
+        <!-- Right Panel: Pseudocode & History -->
+        <aside class="right-panel">
+            
+            <!-- Pseudocode Tracker -->
+            <div class="panel-section">
+                <h2>Pseudocode</h2>
+                <div class="pseudocode-container" id="pseudocode-box">
+                    <div class="code-line" id="line-1" title="Define BFS function taking graph and start node S"><span class="line-num">1</span><span class="code-text">BFS(graph, S):</span></div>
+                    <div class="code-line" id="line-2" title="Initialize a FIFO Queue"><span class="line-num">2</span><span class="code-text">  let Q be a queue</span></div>
+                    <div class="code-line" id="line-3" title="Add the starting node to the queue"><span class="line-num">3</span><span class="code-text">  Q.enqueue(S)</span></div>
+                    <div class="code-line" id="line-4" title="Mark starting node as discovered (Gray)"><span class="line-num">4</span><span class="code-text">  mark S as discovered</span></div>
+                    <div class="code-line" id="line-5" title="Loop runs as long as there are nodes to process"><span class="line-num">5</span><span class="code-text">  while Q is not empty:</span></div>
+                    <div class="code-line" id="line-6" title="Remove the front node from the queue"><span class="line-num">6</span><span class="code-text">    v = Q.dequeue()</span></div>
+                    <div class="code-line" id="line-7" title="Mark current node as fully explored (Black)"><span class="line-num">7</span><span class="code-text">    mark v as explored</span></div>
+                    <div class="code-line" id="line-8" title="Look at all connected neighbors of v"><span class="line-num">8</span><span class="code-text">    for all edges from v to w:</span></div>
+                    <div class="code-line" id="line-9" title="Check if neighbor hasn't been seen yet"><span class="line-num">9</span><span class="code-text">      if w is not discovered:</span></div>
+                    <div class="code-line" id="line-10" title="Mark neighbor as discovered (Gray)"><span class="line-num">10</span><span class="code-text">        mark w as discovered</span></div>
+                    <div class="code-line" id="line-11" title="Add neighbor to the queue for future processing"><span class="line-num">11</span><span class="code-text">        Q.enqueue(w)</span></div>
+                </div>
+            </div>
+
+            <!-- Action History Table -->
+            <div class="panel-section" style="flex:1; display: flex; flex-direction: column;">
+                <h2>History Log (Click to Jump)</h2>
+                <div class="history-container" id="history-box">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">Step</th>
+                                <th>Action Log</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </aside>
     </div>
 
     <script>
-        // Graph Data
+        // Graph Data Representation
         const graphData = {
             nodes: [
-                { id: 'A', x: 150, y: 300 },
-                { id: 'B', x: 300, y: 150 },
-                { id: 'C', x: 300, y: 450 },
-                { id: 'D', x: 450, y: 150 },
-                { id: 'E', x: 450, y: 450 },
-                { id: 'F', x: 650, y: 300 },
+                { id: 'A', x: 150, y: 300 }, { id: 'B', x: 300, y: 150 },
+                { id: 'C', x: 300, y: 450 }, { id: 'D', x: 450, y: 150 },
+                { id: 'E', x: 450, y: 450 }, { id: 'F', x: 650, y: 300 },
                 { id: 'G', x: 400, y: 300 }
             ],
             edges: [
-                { source: 'A', target: 'B' },
-                { source: 'A', target: 'C' },
-                { source: 'B', target: 'D' },
-                { source: 'B', target: 'G' },
-                { source: 'C', target: 'G' },
-                { source: 'C', target: 'E' },
-                { source: 'D', target: 'F' },
-                { source: 'E', target: 'F' },
+                { source: 'A', target: 'B' }, { source: 'A', target: 'C' },
+                { source: 'B', target: 'D' }, { source: 'B', target: 'G' },
+                { source: 'C', target: 'G' }, { source: 'C', target: 'E' },
+                { source: 'D', target: 'F' }, { source: 'E', target: 'F' },
                 { source: 'G', target: 'D' }
             ]
         };
@@ -358,7 +378,6 @@
         // DOM Elements
         const edgesLayer = document.getElementById('edges-layer');
         const nodesLayer = document.getElementById('nodes-layer');
-        
         const btnBuild = document.getElementById('btn-build');
         const btnStep = document.getElementById('btn-step');
         const btnPlay = document.getElementById('btn-play');
@@ -370,23 +389,30 @@
         const speedSlider = document.getElementById('speed-slider');
         const speedDisplay = document.getElementById('speed-display');
         const visualQueue = document.getElementById('visual-queue');
+        const stepExplanation = document.getElementById('step-explanation');
+        
+        const statDiscovered = document.getElementById('stat-discovered');
+        const statEdges = document.getElementById('stat-edges');
+        const statQueue = document.getElementById('stat-queue');
+        
+        const historyBody = document.getElementById('history-body');
+        const historyBox = document.getElementById('history-box');
 
         // Application State
         let snapshots = [];
         let currentStep = 0;
         let isPlaying = false;
         let playTimerId = null;
-        let baseInterval = 1000; // 1 second base delay
+        let baseInterval = 1000;
 
-        // Setup Graph Adjacency List
+        // Adjacency List
         const adjList = {};
         graphData.nodes.forEach(n => adjList[n.id] = []);
         graphData.edges.forEach(e => {
             adjList[e.source].push(e.target);
             adjList[e.target].push(e.source);
         });
-        // Sort alphabetically to make the BFS deterministic and easy to follow
-        for (let key in adjList) adjList[key].sort();
+        for (let key in adjList) adjList[key].sort(); // Alphabetical deterministic tie-breaker
 
         /**
          * 1. Draw Static SVG Graph
@@ -398,7 +424,6 @@
             const nodeLookup = {};
             graphData.nodes.forEach(node => { nodeLookup[node.id] = node; });
 
-            // Edges
             graphData.edges.forEach(edge => {
                 const s = nodeLookup[edge.source];
                 const t = nodeLookup[edge.target];
@@ -409,7 +434,6 @@
                 edgesLayer.appendChild(line);
             });
 
-            // Nodes
             graphData.nodes.forEach(node => {
                 const group = document.createElementNS(svgNS, 'g');
                 group.setAttribute('id', `node-${node.id}`);
@@ -428,50 +452,95 @@
         }
 
         /**
-         * 2. BFS Logic - Builds the Snapshots
+         * 2. Micro-stepped BFS Logic (Builds rich Snapshots)
          */
         function buildBfsSteps() {
             snapshots = [];
-            let states = {};
-            graphData.nodes.forEach(n => states[n.id] = 'undiscovered');
+            let states = {}; graphData.nodes.forEach(n => states[n.id] = 'undiscovered');
             let queue = [];
+            let stats = { discovered: 0, edges: 0, queueOps: 0 };
 
-            // Helper to capture a deep copy of the current state
-            const captureState = () => {
+            // Helper to capture state
+            const addSnap = (line, msg, logMsg, actionClass) => {
                 snapshots.push({
                     nodeStates: { ...states },
-                    queueState: [...queue]
+                    queueState: [...queue],
+                    stats: { ...stats },
+                    activeLine: line,
+                    explanation: msg,
+                    logMsg: logMsg, // Shorter string for history table
+                    actionClass: actionClass
                 });
             };
 
-            // Step 0: All Undiscovered
-            captureState();
+            // Initial State
+            addSnap(1, "Ready to start BFS. Initializing algorithm starting from node A.", "Initialize BFS", "hist-init");
 
-            // Start BFS from Node 'A'
-            const startNode = 'A';
-            states[startNode] = 'queued';
-            queue.push(startNode);
-            captureState();
+            // Line 2: Queue
+            addSnap(2, "Initializing an empty FIFO Queue (Q).", "Create empty Queue", "hist-init");
 
+            const start = 'A';
+            
+            // Line 3: Enqueue Start
+            queue.push(start);
+            stats.queueOps++;
+            addSnap(3, `Enqueuing start node ${start}.`, `Enqueue ${start}`, "hist-enqueue");
+
+            // Line 4: Mark Start Discovered
+            states[start] = 'queued'; // 'discovered' visually translates to queued (gray)
+            stats.discovered++;
+            addSnap(4, `Marking node ${start} as discovered.`, `Discover ${start}`, "hist-discover");
+
+            // BFS Loop
             while (queue.length > 0) {
-                // Dequeue
-                let curr = queue.shift();
-                states[curr] = 'explored';
-                captureState();
+                // Line 5: Check While
+                addSnap(5, `Queue has ${queue.length} item(s). Continuing loop.`, "Check Queue !empty", "hist-init");
 
-                // Check neighbors
-                adjList[curr].forEach(neighbor => {
+                // Line 6: Dequeue
+                let curr = queue.shift();
+                stats.queueOps++;
+                addSnap(6, `Dequeued node ${curr} from the front of the queue.`, `Dequeue ${curr}`, "hist-dequeue");
+
+                // Line 7: Explore
+                states[curr] = 'explored';
+                addSnap(7, `Marking node ${curr} as fully explored (Black).`, `Explore ${curr}`, "hist-explore");
+
+                // Line 8: Neighbors
+                const neighbors = adjList[curr];
+                if (neighbors.length === 0) {
+                    addSnap(8, `Node ${curr} has no neighbors.`, `Check neighbors of ${curr}`, "hist-init");
+                } else {
+                    addSnap(8, `Iterating over edges from ${curr} to its neighbors: ${neighbors.join(', ')}`, `Check neighbors of ${curr}`, "hist-init");
+                }
+
+                neighbors.forEach(neighbor => {
+                    stats.edges++;
+                    
+                    // Line 9: If not discovered
+                    addSnap(9, `Checking if neighbor ${neighbor} has been discovered yet.`, `Check if ${neighbor} discovered`, "hist-init");
+
                     if (states[neighbor] === 'undiscovered') {
+                        // Line 10: Mark discovered
                         states[neighbor] = 'queued';
+                        stats.discovered++;
+                        addSnap(10, `Node ${neighbor} is undiscovered. Marking it as discovered (Gray).`, `Discover ${neighbor}`, "hist-discover");
+
+                        // Line 11: Enqueue
                         queue.push(neighbor);
-                        captureState(); // Animate each discovery level
+                        stats.queueOps++;
+                        addSnap(11, `Adding node ${neighbor} to the back of the queue.`, `Enqueue ${neighbor}`, "hist-enqueue");
+                    } else {
+                        addSnap(9, `Node ${neighbor} is already discovered or explored. Skipping.`, `Skip ${neighbor}`, "hist-init");
                     }
                 });
             }
+
+            // End State
+            addSnap(5, "Queue is empty. BFS algorithm has finished exploring all reachable nodes.", "BFS Complete", "hist-init");
         }
 
         /**
-         * 3. Apply a specific snapshot to the UI
+         * 3. Apply Snapshot to UI
          */
         function applySnapshot(index) {
             if (index < 0 || index >= snapshots.length) return;
@@ -480,9 +549,7 @@
             // Update SVG Nodes
             graphData.nodes.forEach(node => {
                 const el = document.getElementById(`node-${node.id}`);
-                const state = snap.nodeStates[node.id];
-                // Smoothly replace previous state class with new one
-                el.setAttribute('class', `node node-${state}`);
+                el.setAttribute('class', `node node-${snap.nodeStates[node.id]}`);
             });
 
             // Update Visual Queue
@@ -498,25 +565,82 @@
                 });
             }
 
-            // Update Counters
+            // Update Explanation & Stats
+            stepExplanation.textContent = snap.explanation;
+            statDiscovered.textContent = snap.stats.discovered;
+            statEdges.textContent = snap.stats.edges;
+            statQueue.textContent = snap.stats.queueOps;
             stepCounter.textContent = `Step ${index} / ${snapshots.length - 1}`;
-            
-            // Check Done State
+
+            // Update Pseudocode Highlight
+            document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active-line'));
+            const activeCodeEl = document.getElementById(`line-${snap.activeLine}`);
+            if (activeCodeEl) {
+                activeCodeEl.classList.add('active-line');
+                // Auto-scroll pseudocode
+                activeCodeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Rebuild History Table
+            renderHistoryTable(index);
+
+            // Check Done
             if (index === snapshots.length - 1) {
                 pausePlayback();
                 updateStatus('Done');
                 btnStep.disabled = true;
                 btnPlay.disabled = true;
-                btnPause.disabled = true; // Fix: Explicitly disable Pause when done
+                btnPause.disabled = true; 
             }
         }
 
         /**
-         * 4. Playback Controls Logic
+         * 4. History Table Renderer
          */
-        function updateStatus(statusStr) {
-            statusText.textContent = statusStr;
+        function renderHistoryTable(currentIndex) {
+            historyBody.innerHTML = '';
+            
+            // Render up to the current step
+            for (let i = 0; i <= currentIndex; i++) {
+                const snap = snapshots[i];
+                const tr = document.createElement('tr');
+                tr.classList.add(snap.actionClass);
+                
+                // Highlight the absolute current row
+                if (i === currentIndex) tr.classList.add('active-history');
+                
+                tr.innerHTML = `
+                    <td>${i}</td>
+                    <td>${snap.logMsg}</td>
+                `;
+                
+                // Clicking a history row jumps to that step
+                tr.addEventListener('click', () => jumpToStep(i));
+                historyBody.appendChild(tr);
+            }
+
+            // Auto-scroll to the bottom of history log
+            historyBox.scrollTop = historyBox.scrollHeight;
         }
+
+        function jumpToStep(targetIndex) {
+            pausePlayback(); // Pause to avoid jarring playback jumps
+            currentStep = targetIndex;
+            
+            // Re-enable step/play buttons if we jumped backward from the end
+            if (currentStep < snapshots.length - 1) {
+                updateStatus('Paused');
+                btnPlay.disabled = false;
+                btnStep.disabled = false;
+            }
+            
+            applySnapshot(currentStep);
+        }
+
+        /**
+         * 5. Playback Controls Logic
+         */
+        function updateStatus(statusStr) { statusText.textContent = statusStr; }
 
         function toggleButtons(isBuilt) {
             btnBuild.disabled = isBuilt;
@@ -554,6 +678,7 @@
         }
 
         function pausePlayback() {
+            if (!isPlaying) return;
             isPlaying = false;
             clearTimeout(playTimerId);
             if (currentStep < snapshots.length - 1) {
@@ -572,12 +697,21 @@
             renderInitialGraph();
             visualQueue.innerHTML = `<span class="queue-empty">Queue is empty</span>`;
             stepCounter.textContent = `Step 0 / 0`;
+            stepExplanation.textContent = `Click "Build Algorithm" to initialize BFS.`;
+            
+            statDiscovered.textContent = 0;
+            statEdges.textContent = 0;
+            statQueue.textContent = 0;
+            
+            historyBody.innerHTML = '';
+            document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active-line'));
+            
             updateStatus('Idle');
             toggleButtons(false);
         }
 
         /**
-         * 5. Event Listeners
+         * 6. Event Listeners
          */
         btnBuild.addEventListener('click', () => {
             buildBfsSteps();
@@ -589,22 +723,12 @@
 
         btnStep.addEventListener('click', () => {
             executeStep();
-            if (currentStep < snapshots.length - 1) {
-                updateStatus('Paused');
-            }
+            if (currentStep < snapshots.length - 1) updateStatus('Paused');
         });
 
-        btnPlay.addEventListener('click', () => {
-            playPlayback();
-        });
-
-        btnPause.addEventListener('click', () => {
-            pausePlayback();
-        });
-
-        btnReset.addEventListener('click', () => {
-            resetApp();
-        });
+        btnPlay.addEventListener('click', () => playPlayback());
+        btnPause.addEventListener('click', () => pausePlayback());
+        btnReset.addEventListener('click', () => resetApp());
 
         speedSlider.addEventListener('input', (e) => {
             speedDisplay.textContent = `${parseFloat(e.target.value).toFixed(2)}x`;
