@@ -100,6 +100,10 @@
         h1 { font-size: 1.5rem; color: var(--accent); }
         h2 { font-size: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
 
+        /* Legend Styles */
+        .legend-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .legend-color { width: 18px; height: 18px; border-radius: 50%; }
+
         /* Buttons & Inputs */
         .btn-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
         button {
@@ -152,7 +156,7 @@
         .node circle { r: 22px; stroke-width: 3px; transition: fill 0.3s ease, stroke 0.3s ease; }
         .node text.node-id { font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill 0.3s ease; }
         
-        /* New Distance Label */
+        /* Distance Label */
         .dist-label { font-size: 14px; font-weight: bold; fill: #ffeb3b; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; text-shadow: 1px 1px 2px #000; }
         
         /* State Colors */
@@ -163,7 +167,6 @@
         .node-explored circle { fill: var(--color-explored); stroke: var(--text-muted); }
         .node-explored text.node-id { fill: var(--text-dark-bg); }
 
-        /* Show distance label only when queued or explored */
         .node-queued .dist-label, .node-explored .dist-label { opacity: 1; }
 
         /* =========================================
@@ -208,6 +211,18 @@
         .tab-content p { margin-bottom: 1rem; font-size: 1.05rem; }
         .tab-content ul { margin-left: 2rem; margin-bottom: 1rem; }
         .tab-content li { margin-bottom: 0.5rem; }
+
+        /* Key Concept Box */
+        .key-concept-box {
+            background-color: rgba(69, 162, 158, 0.15);
+            border-left: 5px solid var(--accent);
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 1.05rem;
+            color: var(--text-main);
+        }
+        .key-concept-box strong { color: var(--accent); display: block; margin-bottom: 0.3rem; }
 
         /* SVG Chart */
         .chart-box { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; text-align: center; }
@@ -258,6 +273,23 @@
                     <span class="info-label">Speed:</span>
                     <input type="range" id="speed-slider" min="0.25" max="4" step="0.25" value="1">
                     <span class="info-value" id="speed-display">1.00x</span>
+                </div>
+            </div>
+
+            <!-- Color-Coded Legend -->
+            <div class="panel-section">
+                <h2>Node States</h2>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--color-undiscovered); border: 2px solid var(--node-stroke);"></div>
+                    <span>Undiscovered (Not yet seen)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--color-queued); border: 2px solid var(--node-stroke);"></div>
+                    <span>Queued (Discovered, waiting)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--color-explored); border: 2px solid var(--text-muted);"></div>
+                    <span>Explored (Fully processed)</span>
                 </div>
             </div>
 
@@ -328,9 +360,10 @@
             <button class="tab-btn active" onclick="openTab(event, 'clo1')">CLO-1: Complexity</button>
             <button class="tab-btn" onclick="openTab(event, 'clo2')">CLO-2: Searching Strategy</button>
             <button class="tab-btn" onclick="openTab(event, 'clo3')">CLO-3: Paradigm & Shortest Paths</button>
+            <button class="tab-btn" onclick="openTab(event, 'worked-example')">Worked Example</button>
         </div>
 
-        <!-- CLO 1 -->
+        <!-- CLO 1: Complexity -->
         <div id="clo1" class="tab-content active">
             <h3>Complexity Analysis: O(V + E)</h3>
             <p>The time complexity of Breadth-First Search is exactly proportional to the number of Vertices (V) and Edges (E) in the graph: <strong>O(V + E)</strong>.</p>
@@ -348,9 +381,7 @@
                     <label>Vertices (V): <span id="chart-v-val" style="color:var(--accent);font-weight:bold;">10</span></label>
                     <input type="range" id="chart-slider" min="5" max="50" value="10" style="width: 200px; margin-left: 1rem;">
                 </div>
-                <!-- Simple SVG Coordinate System for Chart -->
                 <svg class="chart-svg" viewBox="0 -300 600 300">
-                    <!-- Flipped Y axis via transform so 0,0 is bottom left -->
                     <g transform="scale(1, -1)">
                         <path id="chart-path" class="chart-line" d=""></path>
                         <circle id="chart-dot" class="chart-point" cx="0" cy="0"></circle>
@@ -360,28 +391,76 @@
             </div>
         </div>
 
-        <!-- CLO 2 -->
+        <!-- CLO 2: Searching -->
         <div id="clo2" class="tab-content">
             <h3>Searching: Systematic Level-by-Level</h3>
             <p>BFS employs a <strong>systematic level-by-level searching</strong> mechanism. It fully explores all nodes at the present "depth" (distance from the start) before moving on to nodes at the next depth level.</p>
-            <p>To achieve this, BFS relies strictly on a <strong>First-In-First-Out (FIFO) Queue</strong>. When a node is discovered, it is placed at the back of the queue. The algorithm always processes the node at the front of the queue next. You can observe this in real-time in the Left Panel visual queue of this application.</p>
+            
+            <div class="key-concept-box">
+                <strong>Key Concept: The FIFO Queue Requirement</strong>
+                To achieve this perfect level-by-level traversal, BFS relies strictly on a First-In-First-Out (FIFO) Queue. When a node is discovered, it is placed at the back of the queue. Because it always pulls from the front, it guarantees that all nodes discovered at distance <em>d</em> are fully processed before the algorithm even looks at nodes at distance <em>d+1</em>.
+            </div>
+
             <p><strong>Queue (BFS) vs. Stack (DFS):</strong></p>
             <ul>
-                <li><strong>BFS (Queue):</strong> Oldest discovered nodes are processed first. This guarantees we check distance 1 nodes, then distance 2 nodes, spreading out like a ripple in water.</li>
-                <li><strong>DFS (Stack):</strong> Newest discovered nodes are processed first (LIFO). This causes the algorithm to plunge as deep as possible down a single path before backtracking.</li>
+                <li><strong>BFS (Queue):</strong> Oldest discovered nodes are processed first. This guarantees we check distance 1 nodes, then distance 2 nodes, spreading out evenly like a ripple in water.</li>
+                <li><strong>DFS (Stack):</strong> Newest discovered nodes are processed first (LIFO). This causes the algorithm to plunge as deep as possible down a single path before eventually backtracking.</li>
             </ul>
         </div>
 
-        <!-- CLO 3 -->
+        <!-- CLO 3: Paradigm -->
         <div id="clo3" class="tab-content">
             <h3>Paradigm: Greedy-Like Shortest Paths</h3>
             <p>BFS is effectively a <strong>Greedy-like strategy</strong> for unweighted graphs. At every step, it makes the locally optimal choice by exploring the absolute nearest unvisited nodes first.</p>
-            <p>Because it expands evenly, the moment BFS discovers a target node, it is guaranteed to have found the <strong>shortest path</strong> to that node (in terms of fewest edges). Look closely at the visualization above: as nodes turn gray, a distance label (<code>d=...</code>) is stamped next to them. This distance is permanently optimal.</p>
-            <p><strong>BFS vs. Bellman-Ford:</strong></p>
-            <ul>
-                <li><strong>BFS:</strong> Fast, greedy, O(V+E). Perfect for unweighted shortest paths.</li>
-                <li><strong>Bellman-Ford:</strong> Uses Dynamic Programming. Slower, O(V × E). However, Bellman-Ford can handle graphs with variable edge weights and even negative weight cycles, which BFS completely fails to solve.</li>
-            </ul>
+            <p>Because it expands evenly, the moment BFS discovers a target node, it is guaranteed to have found the <strong>shortest path</strong> to that node (in terms of fewest edges). Look closely at the visualization above: as nodes turn queued/gray, a distance label (<code>d=...</code>) is stamped next to them. This distance is permanently optimal.</p>
+            
+            <div class="key-concept-box">
+                <strong>Key Limitation: Why BFS Fails on Weighted Graphs</strong>
+                BFS assumes every edge has an identical "weight" or cost of 1. Therefore, the path with the fewest edges is always the shortest path. However, in weighted graphs (e.g., city distances), a path with 5 short edges might be much cheaper than a path with 1 massive edge. Because BFS doesn't look at weights, it will greedily choose the 1-edge path, returning an incorrect "shortest path". For weighted graphs, Dynamic Programming (Bellman-Ford) or greedy Priority Queues (Dijkstra's) are required.
+            </div>
+        </div>
+
+        <!-- Worked Example -->
+        <div id="worked-example" class="tab-content">
+            <h3>Step-by-Step: BFS on a Tree</h3>
+            <p>Let's trace the algorithm using the <strong>Tree preset</strong>. The tree edges are: A-B, A-C, B-D, B-E, C-F, C-G. We begin our search starting at the root node, <strong>A</strong>.</p>
+            
+            <div style="margin-top: 1.5rem;">
+                <p><strong>Step 1: Initialization</strong></p>
+                <ul>
+                    <li>Start at <strong>A</strong>. Mark A as discovered (distance = 0) and add it to the queue.</li>
+                    <li><em>Current Queue:</em> <code>[A]</code></li>
+                </ul>
+
+                <p><strong>Step 2: Process Level 0 (Node A)</strong></p>
+                <ul>
+                    <li>Dequeue <strong>A</strong>. Explore its neighbors: <strong>B</strong> and <strong>C</strong>.</li>
+                    <li>Mark B and C as discovered (distance = 1), and enqueue them. Mark A as fully explored.</li>
+                    <li><em>Current Queue:</em> <code>[B, C]</code></li>
+                </ul>
+
+                <p><strong>Step 3: Process Level 1 (Node B)</strong></p>
+                <ul>
+                    <li>Dequeue <strong>B</strong>. Explore its neighbors: <strong>D</strong> and <strong>E</strong>.</li>
+                    <li>Mark D and E as discovered (distance = 2), and enqueue them. Mark B as fully explored.</li>
+                    <li><em>Current Queue:</em> <code>[C, D, E]</code></li>
+                </ul>
+
+                <p><strong>Step 4: Process Level 1 (Node C)</strong></p>
+                <ul>
+                    <li>Dequeue <strong>C</strong>. Explore its neighbors: <strong>F</strong> and <strong>G</strong>.</li>
+                    <li>Mark F and G as discovered (distance = 2), and enqueue them. Mark C as fully explored.</li>
+                    <li><em>Current Queue:</em> <code>[D, E, F, G]</code></li>
+                </ul>
+
+                <p><strong>Step 5+: Process Level 2 (Leaf Nodes)</strong></p>
+                <ul>
+                    <li>Dequeue <strong>D, E, F,</strong> and <strong>G</strong> one by one. None of them have any undiscovered neighbors.</li>
+                    <li>Each node is simply marked as fully explored.</li>
+                    <li><em>Final Queue:</em> <code>[]</code> (Empty)</li>
+                </ul>
+            </div>
+            <p style="margin-top: 1.5rem; color: var(--accent); font-weight: bold;">Once the queue is completely empty, the while loop terminates and the BFS algorithm is complete!</p>
         </div>
     </div>
 
@@ -392,7 +471,7 @@
         const presets = {
             standard: "A-B\nA-C\nB-D\nB-G\nC-G\nC-E\nD-F\nE-F\nG-D",
             tree: "A-B\nA-C\nB-D\nB-E\nC-F\nC-G",
-            dense: "A-B\nA-C\nA-D\nA-E\nB-C\nB-D\nB-E\nC-D\nC-E\nD-E" // Complete graph K5
+            dense: "A-B\nA-C\nA-D\nA-E\nB-C\nB-D\nB-E\nC-D\nC-E\nD-E" 
         };
 
         let graphData = { nodes: [], edges: [] };
@@ -439,13 +518,11 @@
                 if (parts.length === 2 && parts[0] !== '' && parts[1] !== '') {
                     nodeSet.add(parts[0]);
                     nodeSet.add(parts[1]);
-                    // Store alphabetically to prevent duplicates A-B vs B-A
                     const sorted = [...parts].sort();
                     edgeSet.push({ source: sorted[0], target: sorted[1] });
                 }
             });
 
-            // Remove duplicate edges
             const uniqueEdges = [];
             const edgeMap = new Set();
             edgeSet.forEach(e => {
@@ -458,7 +535,6 @@
 
             const nodesList = Array.from(nodeSet).sort();
             
-            // Generate circular layout coordinates
             const centerX = 400, centerY = 300, radius = 220;
             const nodes = nodesList.map((id, index) => {
                 const angle = (index * (2 * Math.PI) / nodesList.length) - Math.PI/2;
@@ -479,7 +555,7 @@
                 adjList[e.source].push(e.target);
                 adjList[e.target].push(e.source);
             });
-            for (let key in adjList) adjList[key].sort(); // Deterministic ordering
+            for (let key in adjList) adjList[key].sort(); 
         }
 
         function loadCustomGraph() {
@@ -487,7 +563,6 @@
             const rawText = graphInput.value;
             graphData = parseGraphInput(rawText);
             
-            // Check density for warning
             const V = graphData.nodes.length;
             const E = graphData.edges.length;
             if (V > 3 && E >= (V * (V - 1)) / 4) warningText.style.display = 'block';
@@ -537,7 +612,7 @@
                 distText.setAttribute('id', `dist-${node.id}`);
                 distText.setAttribute('dy', '-30');
                 distText.setAttribute('dx', '30');
-                distText.textContent = ''; // Filled during animation
+                distText.textContent = ''; 
 
                 group.appendChild(circle);
                 group.appendChild(text);
@@ -547,7 +622,7 @@
         }
 
         /* =========================================
-           BFS LOGIC (CLO-3 Integrated)
+           BFS LOGIC
            ========================================= */
         function buildBfsSteps() {
             if (graphData.nodes.length === 0) return;
@@ -568,7 +643,7 @@
             addSnap(1, "Initializing algorithm...", "Initialize BFS", "hist-init");
             addSnap(2, "Initializing empty Queue (Q).", "Create Queue", "hist-init");
 
-            const start = graphData.nodes[0].id; // Always start from first node alphabetically
+            const start = graphData.nodes[0].id; 
             
             queue.push(start);
             distances[start] = 0;
@@ -623,7 +698,6 @@
                 const el = document.getElementById(`node-${node.id}`);
                 el.setAttribute('class', `node node-${snap.nodeStates[node.id]}`);
                 
-                // Update Distance Label
                 const d = snap.distances[node.id];
                 const dText = document.getElementById(`dist-${node.id}`);
                 dText.textContent = d !== null ? `d=${d}` : '';
@@ -749,15 +823,9 @@
             const V = parseInt(chartSlider.value);
             document.getElementById('chart-v-val').textContent = V;
             
-            // Dense graph Math: E = V(V-1)/2. 
             const E = (V * (V - 1)) / 2;
             const operations = V + E;
             document.getElementById('chart-op-val').textContent = operations;
-
-            // Update SVG Chart Path up to max V=50 (Max Ops = 50 + 1225 = 1275)
-            // Chart dims: width 600, height 300. 
-            // Scale X: 600 / 50 = 12px per V
-            // Scale Y: 300 / 1300 approx = 0.23px per Op
             
             let dString = "M 0 0 ";
             for(let v = 0; v <= 50; v++) {
@@ -767,7 +835,6 @@
             }
             document.getElementById('chart-path').setAttribute('d', dString);
             
-            // Move dot
             document.getElementById('chart-dot').setAttribute('cx', V * 12);
             document.getElementById('chart-dot').setAttribute('cy', operations * 0.23);
         }
