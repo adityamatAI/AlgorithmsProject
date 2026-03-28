@@ -9,25 +9,26 @@
            CSS Custom Properties & Reset
            ========================================= */
         :root {
-            /* Layout & Theme Colors */
             --bg-color: #121212;
             --panel-bg: #1e1e24;
             --border-color: #333333;
             --text-main: #f5f5f5;
             --text-muted: #aaaaaa;
             
-            /* Graph Colors */
             --edge-color: #444444;
             --node-stroke: #555555;
             
-            /* Node State Colors */
             --color-undiscovered: #ffffff;
-            --color-queued: #8892b0; /* A soft, visible gray/slate */
+            --color-queued: #8892b0; 
             --color-explored: #222222;
             
-            /* Text Colors based on State */
             --text-undiscovered: #121212;
             --text-dark-bg: #ffffff;
+            
+            --btn-bg: #3a3f58;
+            --btn-hover: #4e5577;
+            --btn-disabled: #2a2d3d;
+            --accent: #64ffda;
         }
 
         * {
@@ -42,7 +43,7 @@
             color: var(--text-main);
             display: flex;
             height: 100vh;
-            overflow: hidden; /* Prevent body scroll */
+            overflow: hidden;
         }
 
         /* =========================================
@@ -54,7 +55,6 @@
             height: 100%;
         }
 
-        /* Control Panel (Left Column) */
         .control-panel {
             width: 420px;
             background-color: var(--panel-bg);
@@ -77,7 +77,6 @@
             line-height: 1.4;
         }
 
-        /* Visualization Area (Right Column) */
         .visualization-area {
             flex: 1;
             display: flex;
@@ -88,62 +87,129 @@
             overflow: hidden;
         }
 
-        /* Responsive Breakpoint */
         @media (max-width: 980px) {
-            body {
-                overflow: auto;
-            }
-            .app-container {
-                flex-direction: column;
-            }
+            body { overflow: auto; }
+            .app-container { flex-direction: column; }
             .control-panel {
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                height: auto;
             }
-            .visualization-area {
-                min-height: 500px;
-            }
+            .visualization-area { min-height: 500px; }
         }
 
         /* =========================================
-           Legend Styles
+           Legend & Controls
            ========================================= */
-        .legend-container {
+        .panel-section {
             background: rgba(0, 0, 0, 0.2);
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
         }
 
-        .legend-container h2 {
+        .panel-section h2 {
             font-size: 1.1rem;
             margin-bottom: 1rem;
+            color: var(--accent);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
             margin-bottom: 0.8rem;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
-
-        .legend-item:last-child {
-            margin-bottom: 0;
-        }
-
+        .legend-item:last-child { margin-bottom: 0; }
         .legend-color {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             margin-right: 12px;
             border: 2px solid var(--node-stroke);
         }
-
         .color-undiscovered { background-color: var(--color-undiscovered); }
         .color-queued { background-color: var(--color-queued); }
         .color-explored { background-color: var(--color-explored); border-color: #555; }
+
+        /* Buttons */
+        .btn-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        button {
+            flex: 1 1 calc(33% - 0.5rem);
+            background-color: var(--btn-bg);
+            color: #fff;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+        button:hover:not(:disabled) { background-color: var(--btn-hover); }
+        button:disabled {
+            background-color: var(--btn-disabled);
+            color: #666;
+            cursor: not-allowed;
+        }
+        #btn-build { flex: 1 1 100%; background-color: var(--accent); color: #000; }
+        #btn-build:hover:not(:disabled) { background-color: #4edbb8; }
+
+        /* Sliders & Text Info */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+        }
+        .info-label { color: var(--text-muted); }
+        .info-value { font-weight: bold; }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .slider-container input[type="range"] { flex: 1; }
+
+        /* Visual FIFO Queue */
+        .queue-container {
+            display: flex;
+            gap: 0.5rem;
+            min-height: 40px;
+            align-items: center;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .queue-item {
+            min-width: 35px;
+            height: 35px;
+            background-color: var(--color-queued);
+            color: var(--text-dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: popIn 0.3s ease forwards;
+            border: 2px solid var(--text-muted);
+        }
+        .queue-empty {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
         /* =========================================
            SVG Graph Styles
@@ -153,25 +219,19 @@
             height: 100%;
             max-width: 800px;
             max-height: 600px;
-            /* Give it a slight background to define the canvas visually if desired */
         }
 
-        /* Edges */
         .edge {
             stroke: var(--edge-color);
             stroke-width: 4px;
             transition: stroke 0.3s ease;
         }
 
-        /* Nodes Base */
-        .node {
-            cursor: default;
-        }
-
         .node circle {
             r: 25px;
             stroke-width: 3px;
-            transition: fill 0.4s ease, stroke 0.4s ease;
+            /* Added 300ms transition as requested */
+            transition: fill 0.3s ease, stroke 0.3s ease;
         }
 
         .node text {
@@ -179,34 +239,20 @@
             font-weight: bold;
             text-anchor: middle;
             dominant-baseline: central;
-            pointer-events: none; /* Text shouldn't block mouse events */
-            transition: fill 0.4s ease;
+            pointer-events: none;
+            transition: fill 0.3s ease;
         }
 
         /* Node States */
-        .node-undiscovered circle {
-            fill: var(--color-undiscovered);
-            stroke: var(--node-stroke);
-        }
-        .node-undiscovered text {
-            fill: var(--text-undiscovered);
-        }
+        .node-undiscovered circle { fill: var(--color-undiscovered); stroke: var(--node-stroke); }
+        .node-undiscovered text { fill: var(--text-undiscovered); }
 
-        .node-queued circle {
-            fill: var(--color-queued);
-            stroke: var(--node-stroke);
-        }
-        .node-queued text {
-            fill: var(--text-dark-bg);
-        }
+        .node-queued circle { fill: var(--color-queued); stroke: var(--node-stroke); }
+        .node-queued text { fill: var(--text-dark-bg); }
 
-        .node-explored circle {
-            fill: var(--color-explored);
-            stroke: var(--text-muted);
-        }
-        .node-explored text {
-            fill: var(--text-dark-bg);
-        }
+        .node-explored circle { fill: var(--color-explored); stroke: var(--text-muted); }
+        .node-explored text { fill: var(--text-dark-bg); }
+
     </style>
 </head>
 <body>
@@ -216,11 +262,11 @@
         <aside class="control-panel">
             <header>
                 <h1>BFS Visualization</h1>
-                <p>Breadth-First Search is an algorithm for searching tree or graph data structures. It explores all nodes at the present depth before moving on to the nodes at the next depth level.</p>
+                <p>Breadth-First Search explores graph nodes level by level using a FIFO (First-In-First-Out) queue.</p>
             </header>
 
             <!-- Status Legend -->
-            <div class="legend-container">
+            <div class="panel-section">
                 <h2>Node States</h2>
                 <div class="legend-item">
                     <div class="legend-color color-undiscovered"></div>
@@ -228,7 +274,7 @@
                 </div>
                 <div class="legend-item">
                     <div class="legend-color color-queued"></div>
-                    <span>In Queue (Discovered, waiting to be explored)</span>
+                    <span>In Queue (Discovered, waiting)</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color color-explored"></div>
@@ -236,17 +282,46 @@
                 </div>
             </div>
 
-            <!-- Future controls will go here (Buttons, Output logs, etc.) -->
-            <div id="controls-container">
-                <!-- Placeholders ready for the next step -->
+            <!-- Controls -->
+            <div class="panel-section">
+                <h2>Controls</h2>
+                
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="status-text">Idle</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Progress:</span>
+                    <span class="info-value" id="step-counter">Step 0 / 0</span>
+                </div>
+
+                <div class="btn-grid">
+                    <button id="btn-build">Build Steps</button>
+                    <button id="btn-step" disabled>Step</button>
+                    <button id="btn-play" disabled>Play</button>
+                    <button id="btn-pause" disabled>Pause</button>
+                    <button id="btn-reset">Reset</button>
+                </div>
+
+                <div class="slider-container">
+                    <span class="info-label">Speed:</span>
+                    <input type="range" id="speed-slider" min="0.25" max="4" step="0.25" value="1">
+                    <span class="info-value" id="speed-display">1.00x</span>
+                </div>
+            </div>
+
+            <!-- Visual Queue -->
+            <div class="panel-section">
+                <h2>Current Queue (FIFO)</h2>
+                <div class="queue-container" id="visual-queue">
+                    <span class="queue-empty">Queue is empty</span>
+                </div>
             </div>
         </aside>
 
         <!-- Visualization Area -->
         <main class="visualization-area">
-            <!-- Viewbox uses an 800x600 coordinate system to keep logic simple while auto-scaling -->
             <svg id="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-                <!-- Groups to ensure edges are drawn behind nodes -->
                 <g id="edges-layer"></g>
                 <g id="nodes-layer"></g>
             </svg>
@@ -254,11 +329,7 @@
     </div>
 
     <script>
-        /**
-         * Graph Data Representation
-         * 7 Nodes forming a well-connected unweighted, undirected graph.
-         * Using an 800x600 grid for positioning.
-         */
+        // Graph Data
         const graphData = {
             nodes: [
                 { id: 'A', x: 150, y: 300 },
@@ -283,53 +354,71 @@
         };
 
         const svgNS = "http://www.w3.org/2000/svg";
+        
+        // DOM Elements
         const edgesLayer = document.getElementById('edges-layer');
         const nodesLayer = document.getElementById('nodes-layer');
+        
+        const btnBuild = document.getElementById('btn-build');
+        const btnStep = document.getElementById('btn-step');
+        const btnPlay = document.getElementById('btn-play');
+        const btnPause = document.getElementById('btn-pause');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const statusText = document.getElementById('status-text');
+        const stepCounter = document.getElementById('step-counter');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedDisplay = document.getElementById('speed-display');
+        const visualQueue = document.getElementById('visual-queue');
+
+        // Application State
+        let snapshots = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let playTimerId = null;
+        let baseInterval = 1000; // 1 second base delay
+
+        // Setup Graph Adjacency List
+        const adjList = {};
+        graphData.nodes.forEach(n => adjList[n.id] = []);
+        graphData.edges.forEach(e => {
+            adjList[e.source].push(e.target);
+            adjList[e.target].push(e.source);
+        });
+        // Sort alphabetically to make the BFS deterministic and easy to follow
+        for (let key in adjList) adjList[key].sort();
 
         /**
-         * Initializes and draws the static SVG graph based on graphData.
+         * 1. Draw Static SVG Graph
          */
-        function renderGraph() {
-            // Create a lookup for node coordinates
+        function renderInitialGraph() {
+            edgesLayer.innerHTML = '';
+            nodesLayer.innerHTML = '';
+            
             const nodeLookup = {};
-            graphData.nodes.forEach(node => {
-                nodeLookup[node.id] = node;
-            });
+            graphData.nodes.forEach(node => { nodeLookup[node.id] = node; });
 
-            // 1. Draw Edges first so they sit underneath nodes visually
+            // Edges
             graphData.edges.forEach(edge => {
-                const sourceNode = nodeLookup[edge.source];
-                const targetNode = nodeLookup[edge.target];
-
+                const s = nodeLookup[edge.source];
+                const t = nodeLookup[edge.target];
                 const line = document.createElementNS(svgNS, 'line');
-                line.setAttribute('x1', sourceNode.x);
-                line.setAttribute('y1', sourceNode.y);
-                line.setAttribute('x2', targetNode.x);
-                line.setAttribute('y2', targetNode.y);
+                line.setAttribute('x1', s.x); line.setAttribute('y1', s.y);
+                line.setAttribute('x2', t.x); line.setAttribute('y2', t.y);
                 line.classList.add('edge');
-                
-                // Add an ID for potential future animations
-                line.setAttribute('id', `edge-${edge.source}-${edge.target}`);
-                
                 edgesLayer.appendChild(line);
             });
 
-            // 2. Draw Nodes
+            // Nodes
             graphData.nodes.forEach(node => {
                 const group = document.createElementNS(svgNS, 'g');
-                // Give each node an ID so we can easily target it in JS later for state changes
                 group.setAttribute('id', `node-${node.id}`);
-                // Start all nodes as "undiscovered"
                 group.classList.add('node', 'node-undiscovered');
-                // Translate the group to the node's (x, y)
                 group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
 
                 const circle = document.createElementNS(svgNS, 'circle');
-                // Radius is managed via CSS
-
                 const text = document.createElementNS(svgNS, 'text');
                 text.textContent = node.id;
-                // Add dy slightly offset to visually center text within the circle perfectly
                 text.setAttribute('dy', '0.1em'); 
 
                 group.appendChild(circle);
@@ -338,9 +427,192 @@
             });
         }
 
-        // Initialize App
+        /**
+         * 2. BFS Logic - Builds the Snapshots
+         */
+        function buildBfsSteps() {
+            snapshots = [];
+            let states = {};
+            graphData.nodes.forEach(n => states[n.id] = 'undiscovered');
+            let queue = [];
+
+            // Helper to capture a deep copy of the current state
+            const captureState = () => {
+                snapshots.push({
+                    nodeStates: { ...states },
+                    queueState: [...queue]
+                });
+            };
+
+            // Step 0: All Undiscovered
+            captureState();
+
+            // Start BFS from Node 'A'
+            const startNode = 'A';
+            states[startNode] = 'queued';
+            queue.push(startNode);
+            captureState();
+
+            while (queue.length > 0) {
+                // Dequeue
+                let curr = queue.shift();
+                states[curr] = 'explored';
+                captureState();
+
+                // Check neighbors
+                adjList[curr].forEach(neighbor => {
+                    if (states[neighbor] === 'undiscovered') {
+                        states[neighbor] = 'queued';
+                        queue.push(neighbor);
+                        captureState(); // Animate each discovery level
+                    }
+                });
+            }
+        }
+
+        /**
+         * 3. Apply a specific snapshot to the UI
+         */
+        function applySnapshot(index) {
+            if (index < 0 || index >= snapshots.length) return;
+            const snap = snapshots[index];
+
+            // Update SVG Nodes
+            graphData.nodes.forEach(node => {
+                const el = document.getElementById(`node-${node.id}`);
+                const state = snap.nodeStates[node.id];
+                // Smoothly replace previous state class with new one
+                el.setAttribute('class', `node node-${state}`);
+            });
+
+            // Update Visual Queue
+            if (snap.queueState.length === 0) {
+                visualQueue.innerHTML = `<span class="queue-empty">Queue is empty</span>`;
+            } else {
+                visualQueue.innerHTML = '';
+                snap.queueState.forEach(id => {
+                    const div = document.createElement('div');
+                    div.classList.add('queue-item');
+                    div.textContent = id;
+                    visualQueue.appendChild(div);
+                });
+            }
+
+            // Update Counters
+            stepCounter.textContent = `Step ${index} / ${snapshots.length - 1}`;
+            
+            // Check Done State
+            if (index === snapshots.length - 1) {
+                pausePlayback();
+                updateStatus('Done');
+                btnStep.disabled = true;
+                btnPlay.disabled = true;
+                btnPause.disabled = true; // Fix: Explicitly disable Pause when done
+            }
+        }
+
+        /**
+         * 4. Playback Controls Logic
+         */
+        function updateStatus(statusStr) {
+            statusText.textContent = statusStr;
+        }
+
+        function toggleButtons(isBuilt) {
+            btnBuild.disabled = isBuilt;
+            btnStep.disabled = !isBuilt;
+            btnPlay.disabled = !isBuilt;
+            btnPause.disabled = true;
+        }
+
+        function executeStep() {
+            if (currentStep < snapshots.length - 1) {
+                currentStep++;
+                applySnapshot(currentStep);
+            }
+        }
+
+        function playPlayback() {
+            if (currentStep >= snapshots.length - 1) return;
+            isPlaying = true;
+            updateStatus('Playing');
+            
+            btnPlay.disabled = true;
+            btnStep.disabled = true;
+            btnPause.disabled = false;
+
+            const speed = parseFloat(speedSlider.value);
+            const delay = baseInterval / speed;
+
+            playTimerId = setTimeout(function loop() {
+                executeStep();
+                if (isPlaying && currentStep < snapshots.length - 1) {
+                    const dynamicSpeed = parseFloat(speedSlider.value);
+                    playTimerId = setTimeout(loop, baseInterval / dynamicSpeed);
+                }
+            }, delay);
+        }
+
+        function pausePlayback() {
+            isPlaying = false;
+            clearTimeout(playTimerId);
+            if (currentStep < snapshots.length - 1) {
+                updateStatus('Paused');
+                btnPlay.disabled = false;
+                btnStep.disabled = false;
+                btnPause.disabled = true;
+            }
+        }
+
+        function resetApp() {
+            pausePlayback();
+            currentStep = 0;
+            snapshots = [];
+            
+            renderInitialGraph();
+            visualQueue.innerHTML = `<span class="queue-empty">Queue is empty</span>`;
+            stepCounter.textContent = `Step 0 / 0`;
+            updateStatus('Idle');
+            toggleButtons(false);
+        }
+
+        /**
+         * 5. Event Listeners
+         */
+        btnBuild.addEventListener('click', () => {
+            buildBfsSteps();
+            currentStep = 0;
+            applySnapshot(0);
+            updateStatus('Ready');
+            toggleButtons(true);
+        });
+
+        btnStep.addEventListener('click', () => {
+            executeStep();
+            if (currentStep < snapshots.length - 1) {
+                updateStatus('Paused');
+            }
+        });
+
+        btnPlay.addEventListener('click', () => {
+            playPlayback();
+        });
+
+        btnPause.addEventListener('click', () => {
+            pausePlayback();
+        });
+
+        btnReset.addEventListener('click', () => {
+            resetApp();
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            speedDisplay.textContent = `${parseFloat(e.target.value).toFixed(2)}x`;
+        });
+
+        // Initialize App on Load
         document.addEventListener('DOMContentLoaded', () => {
-            renderGraph();
+            renderInitialGraph();
         });
 
     </script>
