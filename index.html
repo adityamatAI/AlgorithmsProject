@@ -213,38 +213,53 @@
         /* =========================================
            Pseudocode & History
            ========================================= */
-        .pseudocode-container { background-color: var(--code-bg); border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; overflow-x: auto; border: 1px solid rgba(69,162,158,0.3); }
+        .pseudocode-container { 
+            background-color: var(--code-bg); 
+            border-radius: 6px; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 0.85rem; 
+            overflow-x: auto; 
+            border: 1px solid rgba(69,162,158,0.3); 
+            /* Firefox Custom Scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        /* Chrome/Edge Custom Scrollbar */
+        .pseudocode-container::-webkit-scrollbar { height: 6px; }
+        .pseudocode-container::-webkit-scrollbar-track { background: transparent; }
+        .pseudocode-container::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 6px; }
+
         .code-line { position: relative; display: flex; padding: 0.2rem 0.5rem; cursor: help; white-space: pre; border-left: 3px solid transparent; transition: background 0.2s; }
         .line-num { color: #666; width: 25px; user-select: none; margin-right: 10px; text-align: right; }
         .code-text { color: #ccc; }
         .code-line.active-line { background-color: var(--code-highlight); border-left: 3px solid var(--accent); }
         .code-line.active-line .code-text { color: #fff; font-weight: bold; }
 
-        /* Custom Tooltip */
-        .code-tooltip { visibility: hidden; width: max-content; max-width: 300px; background-color: #111; color: #fff; text-align: center; border-radius: 6px; padding: 5px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-family: 'Segoe UI'; font-size: 0.8rem; pointer-events: none; }
-        .code-line:hover .code-tooltip { visibility: visible; opacity: 1; }
-
-        .history-container {
-            flex: 1;
-            overflow-y: auto;
-            background-color: var(--code-bg);
-            border-radius: 6px;
-            border: 1px solid rgba(69,162,158,0.3);
-            min-height: 0;
+        /* Custom Tooltip - Fixed positioning to prevent phantom scrolling */
+        .code-tooltip { 
+            visibility: hidden; 
+            width: max-content; 
+            max-width: 250px; 
+            background-color: #111; 
+            color: #fff; 
+            text-align: left; 
+            border-radius: 6px; 
+            border: 1px solid rgba(69, 162, 158, 0.5);
+            padding: 6px 10px; 
+            position: absolute; 
+            z-index: 10; 
+            bottom: 120%; 
+            left: 35px; /* Anchored to the left instead of centered */
+            opacity: 0; 
+            transition: opacity 0.2s; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-size: 0.8rem; 
+            pointer-events: none; 
+            white-space: normal;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        th { background-color: var(--panel-bg); color: var(--accent); position: sticky; top: 0; }
-        tbody tr { cursor: pointer; transition: background 0.2s; }
-        tbody tr:hover { background-color: rgba(255,255,255,0.1); }
-        
-        .hist-init { background-color: rgba(136, 136, 136, 0.05); }
-        .hist-enqueue { background-color: rgba(74, 144, 226, 0.1); }
-        .hist-dequeue { background-color: rgba(231, 76, 60, 0.1); }
-        .hist-discover { background-color: rgba(136, 136, 136, 0.15); }
-        .hist-explore { background-color: rgba(69, 162, 158, 0.15); }
-        tr.active-history { background-color: var(--code-highlight) !important; border-left: 3px solid var(--accent); }
-
+        .code-line:hover .code-tooltip { visibility: visible; opacity: 1; }
 
         /* =========================================
            Bottom Panel: Educational Content
@@ -789,7 +804,7 @@
                         addSnap(10, `${w} is undiscovered. Marking discovered.`, `Discover ${w}`, "hist-discover", { v, w, edge: edgeKey });
 
                         distances[w] = distances[v] + 1;
-                        addSnap(11, `Shortest path to ${w} found: distance = ${distances[w]}.`, `Dist ${w}=${distances[w]}`, "hist-init", { v, w, edge: edgeKey });
+                        addSnap(11, `Searching Level ${distances[w]}: Shortest path to ${w} found.`, `Dist ${w}=${distances[w]}`, "hist-init", { v, w, edge: edgeKey });
 
                         queue.push(w);
                         addSnap(12, `Adding ${w} to queue.`, `Enqueue ${w}`, "hist-enqueue", { v, w, edge: edgeKey });
