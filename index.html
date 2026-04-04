@@ -187,7 +187,16 @@
         .dist-label { font-size: 14px; font-weight: bold; fill: #ffeb3b; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; text-shadow: 1px 1px 2px #000; }
         
         .pointer-label { font-size: 20px; font-weight: bold; fill: var(--accent); opacity: 0; transition: opacity 0.2s, transform 0.2s; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 3px #000;}
-
+        @keyframes highlightGreedy {
+            0% { transform: scale(1); fill: #ffeb3b; }
+            50% { transform: scale(1.5); fill: #fff; text-shadow: 0 0 10px #fff; }
+            100% { transform: scale(1); fill: #ffeb3b; }
+        }
+        .greedy-pop { 
+            animation: highlightGreedy 0.5s ease; 
+            transform-origin: center;
+            transform-box: fill-box;
+        }
         /* Node State Colors */
         .node-undiscovered circle { fill: var(--color-undiscovered); stroke: var(--node-stroke); }
         .node-undiscovered text.node-id { fill: var(--text-undiscovered); }
@@ -423,8 +432,9 @@
             <h3>Complexity Analysis: O(V + E)</h3>
             <p>The time complexity of Breadth-First Search is directly proportional to the number of Vertices (V) and Edges (E) in the graph: <strong>O(V + E)</strong>.</p>
             <ul>
-                <li><strong>Time Complexity: O(V + E)</strong>. Every vertex is enqueued/dequeued once (O(V)), and every edge is examined once in a directed graph or twice in an undirected graph (O(E)).</li>
-                <li><strong>Space Complexity: O(V)</strong>. The FIFO queue may need to store up to V vertices in the worst-case (e.g., a "star" graph where the root connects to all other nodes).</li>
+                <li><strong>Worst & Average Case Time Complexity: O(V + E)</strong>. Every vertex is enqueued once, and every edge is examined.</li>
+                <li><strong>Best Case Time Complexity: O(1) or O(V)</strong>. O(1) if searching for a specific target node that happens to be the starting node. If traversing the entire graph, it remains O(V + E).</li>
+                <li><strong>Space Complexity: O(V)</strong>. The FIFO queue may need to store up to V vertices in the worst-case (e.g., a "star" graph).</li>
             </ul>
             <p><strong>Compared to Dijkstra's:</strong> Dijkstra's Algorithm handles weighted edges by using a Priority Queue, bringing its complexity to O((V + E) log V). For unweighted graphs, BFS is significantly faster.</p>
             
@@ -783,7 +793,19 @@
             for(const node of graphData.nodes) {
                 const el = document.getElementById(`node-${node.id}`);
                 el.setAttribute('class', `node node-${snap.nodeStates[node.id]}`);
-                document.getElementById(`dist-${node.id}`).textContent = snap.distances[node.id] !== null ? `d=${snap.distances[node.id]}` : '';
+                
+                const distEl = document.getElementById(`dist-${node.id}`);
+                distEl.textContent = snap.distances[node.id] !== null ? `d=${snap.distances[node.id]}` : '';
+
+                // 1. Remove class to reset animation state
+                distEl.classList.remove('greedy-pop');
+                
+                // 2. Trigger animation if distance is being set right now (Line 11) on target node 'w'
+                if (snap.activeLine === 11 && snap.pointers.w === node.id) {
+                    // Force a browser reflow so the animation restarts smoothly
+                    void distEl.offsetWidth; 
+                    distEl.classList.add('greedy-pop');
+                }
             }
 
             // Update visual pointers (v and w)
