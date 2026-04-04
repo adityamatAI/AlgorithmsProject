@@ -110,6 +110,10 @@
             min-height: 0; /* FIX 2/3: Tells the dark panels they can shrink */
         }
 
+        history-panel {
+            flex: 1;
+        }
+
         /* =========================================
            Panel Sections & Controls
            ========================================= */
@@ -229,6 +233,53 @@
         .pseudocode-container::-webkit-scrollbar { height: 6px; }
         .pseudocode-container::-webkit-scrollbar-track { background: transparent; }
         .pseudocode-container::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 6px; }
+
+        .history-container {
+            flex: 1; /* CRITICAL: Allows this div to grow and fill the available space in its flex parent. */
+            overflow-y: auto; /* CRITICAL: Adds a vertical scrollbar ONLY when content is taller than the container. */
+            min-height: 0; /* Prevents flexbox sizing issues. */
+            
+            /* Optional: Themed scrollbar for consistency with pseudocode box */
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+
+        .history-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .history-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .history-container::-webkit-scrollbar-thumb {
+            background-color: var(--accent);
+            border-radius: 6px;
+        }
+
+        /* Add a style for the history table to look good */
+        #history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #history-table th, #history-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(69, 162, 158, 0.2);
+            font-size: 0.85rem;
+        }
+
+        #history-table th {
+            position: sticky; /* Makes header stick to the top when scrolling */
+            top: 0;
+            background: var(--panel-bg);
+            color: var(--accent);
+        }
+
+        /* Style for the active row in history */
+        .active-history {
+            background-color: var(--code-highlight);
+            font-weight: bold;
+        }
 
         .code-line { position: relative; display: flex; padding: 0.2rem 0.5rem; cursor: help; white-space: pre; border-left: 3px solid transparent; transition: background 0.2s; }
         .line-num { color: #666; width: 25px; user-select: none; margin-right: 10px; text-align: right; }
@@ -408,11 +459,16 @@
                             <div class="code-line" id="line-12"><span class="line-num">12</span><span class="code-text">        Q.enqueue(w)</span><span class="code-tooltip">Add 'w' to the back of the queue for later exploration</span></div>
                         </div>
                     </div>
-                    <div class="panel-section" style="flex:1; display: flex; flex-direction: column;">
+                    <div class="panel-section" id="history-panel">
                         <h2>History Log</h2>
                         <div class="history-container" id="history-box">
                             <table id="history-table">
-                                <thead><tr><th style="width: 25%">Step</th><th>Action Log</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Step</th>
+                                        <th>Action Log</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="history-body"></tbody>
                             </table>
                         </div>
