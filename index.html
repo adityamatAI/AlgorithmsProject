@@ -14,11 +14,15 @@
             --border-color: #45a29e;
             --text-main: #c5c6c7;
             --text-muted: #888888;
+            --accent: #66fcf1;
+            --accent-alt: #ffaf40; /* For Dijkstra/comparison */
+            --code-bg: #1a222c;
+            --code-highlight: rgba(102, 252, 241, 0.15);
             
             --edge-color: #45a29e;
+            --edge-active-color: #ffeb3b; /* Bright yellow */
             --node-stroke: #66fcf1;
             
-            /* START: Replace with this block */
             /* State Colors - CLRS Textbook Strict Requirement */
             --color-undiscovered: #ffffff; /* White */
             --color-queued: #888888;       /* Gray */
@@ -26,10 +30,10 @@
             
             --text-undiscovered: #000000;  /* Black text on white */
             --text-dark-bg: #ffffff;       /* White text on black/gray */
-            /* END: Replacement block */
             
             --btn-bg: #2b3a4a;
             --btn-hover: #45a29e;
+            --btn-disabled: #3a4b5c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,18 +47,18 @@
         }
 
         /* =========================================
-           Layout Framework (Top App Area)
+           Layout Framework (2-Column as per Rubric)
            ========================================= */
         .app-container {
             display: flex;
             width: 100%;
             height: 85vh;
-            min-height: 700px;
+            min-height: 750px; /* Increased to better fit layout */
             border-bottom: 2px solid var(--border-color);
         }
 
-        .left-panel, .right-panel {
-            width: 360px;
+        .left-panel {
+            width: 420px; /* Strict width as per rubric */
             background-color: var(--panel-bg);
             display: flex;
             flex-direction: column;
@@ -62,12 +66,10 @@
             overflow-y: auto;
             padding: 1.5rem;
             flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
         }
 
-        .left-panel { border-right: 1px solid var(--border-color); }
-        .right-panel { border-left: 1px solid var(--border-color); }
-
-        .center-panel {
+        .right-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -76,11 +78,28 @@
             background-color: var(--bg-color);
         }
 
-        /* 980px Breakpoint as per rubric */
+        /* 980px Breakpoint */
         @media (max-width: 980px) {
             .app-container { flex-direction: column; height: auto; }
             .left-panel, .right-panel { width: 100%; border: none; border-bottom: 1px solid var(--border-color); }
-            .center-panel { min-height: 600px; }
+            .visualization-area { min-height: 500px; }
+        }
+        
+        /* Sub-layout for right panel content */
+        .right-panel-content {
+            display: flex;
+            flex: 1;
+            min-height: 0; /* Fix for flexbox overflow */
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .code-and-history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            flex: 1;
+            min-width: 350px;
         }
 
         /* =========================================
@@ -118,47 +137,40 @@
         #btn-build { flex: 1 1 100%; background-color: var(--accent); color: #000; }
         #btn-build:hover:not(:disabled) { background-color: #8afcf4; }
 
-        textarea {
-            width: 100%;
-            background: var(--code-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 0.5rem;
-            font-family: monospace;
-            resize: vertical;
-        }
-
+        textarea { width: 100%; background: var(--code-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; font-family: monospace; resize: vertical; }
         .warning-text { color: var(--accent-alt); font-size: 0.85rem; font-weight: bold; display: none; }
-
         .info-row { display: flex; justify-content: space-between; font-size: 0.9rem; }
         .info-label { color: var(--text-muted); }
         .info-value { font-weight: bold; color: var(--accent); }
-        
         .slider-container { display: flex; align-items: center; gap: 1rem; }
         .slider-container input[type="range"] { flex: 1; }
 
         /* Visual Queue */
-        .queue-container { display: flex; gap: 0.5rem; min-height: 40px; align-items: center; overflow-x: auto; padding-bottom: 0.5rem; }
+        .queue-wrapper { display: flex; align-items: center; gap: 0.5rem; }
+        .queue-wrapper > span { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
+        .queue-container { display: flex; gap: 0.5rem; min-height: 40px; align-items: center; overflow-x: auto; padding-bottom: 0.5rem; flex: 1; }
         .queue-item { min-width: 35px; height: 35px; border-radius: 4px; background-color: var(--color-queued); color: var(--text-dark-bg); display: flex; align-items: center; justify-content: center; font-weight: bold; animation: popIn 0.3s ease forwards; }
         .queue-empty { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
         /* =========================================
-           Center Panel: Visuals
+           Right Panel: Visuals & Code
            ========================================= */
         .step-explanation-box { background-color: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 1.5rem; text-align: center; font-size: 1.1rem; min-height: 80px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
-        .visualization-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .visualization-area { flex: 2; display: flex; align-items: center; justify-content: center; padding: 1rem; border: 1px solid rgba(69, 162, 158, 0.3); border-radius: 8px; background: rgba(0,0,0,0.2); }
         svg.graph-svg { width: 100%; height: 100%; max-width: 800px; max-height: 600px; }
         
-        .edge { stroke: var(--edge-color); stroke-width: 3px; transition: stroke 0.3s ease; }
+        /* Graph Elements */
+        .edge { stroke: var(--edge-color); stroke-width: 3px; transition: stroke 0.3s ease, stroke-width 0.3s ease; }
+        .edge-active { stroke: var(--edge-active-color); stroke-width: 5px; }
+        
         .node circle { r: 22px; stroke-width: 3px; transition: fill 0.3s ease, stroke 0.3s ease; }
         .node text.node-id { font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill 0.3s ease; }
-        
-        /* Distance Label */
         .dist-label { font-size: 14px; font-weight: bold; fill: #ffeb3b; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; text-shadow: 1px 1px 2px #000; }
         
-        /* State Colors */
+        .pointer-label { font-size: 20px; font-weight: bold; fill: var(--accent); opacity: 0; transition: opacity 0.3s, transform 0.3s; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 3px #000;}
+
+        /* Node State Colors */
         .node-undiscovered circle { fill: var(--color-undiscovered); stroke: var(--node-stroke); }
         .node-undiscovered text.node-id { fill: var(--text-undiscovered); }
         .node-queued circle { fill: var(--color-queued); stroke: var(--node-stroke); }
@@ -169,29 +181,40 @@
         .node-queued .dist-label, .node-explored .dist-label { opacity: 1; }
 
         /* =========================================
-           Right Panel: Pseudocode & History
+           Pseudocode & History
            ========================================= */
         .pseudocode-container { background-color: var(--code-bg); border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; overflow-x: auto; border: 1px solid rgba(69,162,158,0.3); }
-        .code-line { display: flex; padding: 0.2rem 0.5rem; cursor: help; white-space: pre; border-left: 3px solid transparent; transition: background 0.2s; }
-        .code-line:hover { background-color: rgba(255,255,255,0.05); }
+        .code-line { position: relative; display: flex; padding: 0.2rem 0.5rem; cursor: help; white-space: pre; border-left: 3px solid transparent; transition: background 0.2s; }
         .line-num { color: #666; width: 25px; user-select: none; margin-right: 10px; text-align: right; }
         .code-text { color: #ccc; }
         .code-line.active-line { background-color: var(--code-highlight); border-left: 3px solid var(--accent); }
         .code-line.active-line .code-text { color: #fff; font-weight: bold; }
 
-        .history-container { flex: 1; overflow-y: auto; background-color: var(--code-bg); border-radius: 6px; border: 1px solid rgba(69,162,158,0.3); min-height: 200px; }
+        /* Custom Tooltip */
+        .code-tooltip { visibility: hidden; width: max-content; max-width: 300px; background-color: #111; color: #fff; text-align: center; border-radius: 6px; padding: 5px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-family: 'Segoe UI'; font-size: 0.8rem; pointer-events: none; }
+        .code-line:hover .code-tooltip { visibility: visible; opacity: 1; }
+
+        .history-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            border: 1px solid rgba(69,162,158,0.3);
+            min-height: 0; /* THE FIX: Allows the flex item to shrink and enable scrolling */
+        }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         th { background-color: var(--panel-bg); color: var(--accent); position: sticky; top: 0; }
         tbody tr { cursor: pointer; transition: background 0.2s; }
-        tbody tr:hover { background-color: rgba(255,255,255,0.05); }
+        tbody tr:hover { background-color: rgba(255,255,255,0.1); }
         
-        .hist-init { border-left: 3px solid #888; }
-        .hist-enqueue { border-left: 3px solid #4a90e2; }
-        .hist-dequeue { border-left: 3px solid #e74c3c; }
-        .hist-discover { border-left: 3px solid var(--color-queued); }
-        .hist-explore { border-left: 3px solid var(--accent); }
-        tr.active-history { background-color: rgba(102, 252, 241, 0.15); }
+        .hist-init { background-color: rgba(136, 136, 136, 0.05); }
+        .hist-enqueue { background-color: rgba(74, 144, 226, 0.1); }
+        .hist-dequeue { background-color: rgba(231, 76, 60, 0.1); }
+        .hist-discover { background-color: rgba(136, 136, 136, 0.15); }
+        .hist-explore { background-color: rgba(69, 162, 158, 0.15); }
+        tr.active-history { background-color: var(--code-highlight) !important; border-left: 3px solid var(--accent); }
+
 
         /* =========================================
            Bottom Panel: Educational Content
@@ -207,35 +230,27 @@
         .tab-content.active { display: block; }
         
         .tab-content h3 { color: var(--accent); margin-bottom: 1rem; font-size: 1.4rem; }
-        .tab-content p { margin-bottom: 1rem; font-size: 1.05rem; }
-        .tab-content ul { margin-left: 2rem; margin-bottom: 1rem; }
+        .tab-content p, .tab-content ul { margin-bottom: 1rem; font-size: 1.05rem; }
+        .tab-content ul { margin-left: 2rem; }
         .tab-content li { margin-bottom: 0.5rem; }
 
-        /* Key Concept Box */
-        .key-concept-box {
-            background-color: rgba(69, 162, 158, 0.15);
-            border-left: 5px solid var(--accent);
-            padding: 1.2rem;
-            margin: 1.5rem 0;
-            border-radius: 0 6px 6px 0;
-            font-size: 1.05rem;
-            color: var(--text-main);
-        }
+        .key-concept-box { background-color: rgba(69, 162, 158, 0.15); border-left: 5px solid var(--accent); padding: 1.2rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0; font-size: 1.05rem; color: var(--text-main); }
         .key-concept-box strong { color: var(--accent); display: block; margin-bottom: 0.3rem; }
 
         /* SVG Chart */
         .chart-box { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; text-align: center; }
         .chart-svg { width: 100%; max-width: 600px; height: 300px; background: #111; border-bottom: 2px solid #fff; border-left: 2px solid #fff; margin-bottom: 1rem; }
-        .chart-line-bfs { stroke: var(--accent); stroke-width: 3; fill: none; transition: d 0.3s ease; }
-        .chart-line-dij { stroke: var(--accent-alt); stroke-width: 3; fill: none; transition: d 0.3s ease; stroke-dasharray: 5,5; }
+        .chart-line { stroke-width: 3; fill: none; transition: d 0.3s ease; }
+        .chart-line-actual { stroke: #fff; stroke-dasharray: 2,4; }
+        .chart-line-bfs { stroke: var(--accent); }
+        .chart-line-dij { stroke: var(--accent-alt); stroke-dasharray: 5,5; }
         .chart-point { r: 6; transition: cx 0.3s, cy 0.3s; }
         
-        .chart-legend { display: flex; justify-content: center; gap: 2rem; font-size: 0.9rem; }
-        .legend-bfs { color: var(--accent); font-weight: bold; }
-        .legend-dij { color: var(--accent-alt); font-weight: bold; }
+        .chart-legend { display: flex; justify-content: center; gap: 1.5rem; font-size: 0.9rem; flex-wrap: wrap; }
+        .legend-item-chart { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-line-sample { width: 20px; height: 3px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
     </style>
 </head>
 <body>
@@ -283,18 +298,9 @@
             <!-- Color-Coded Legend -->
             <div class="panel-section">
                 <h2>Node States</h2>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: var(--color-undiscovered); border: 2px solid var(--node-stroke);"></div>
-                    <span>Undiscovered (Not yet seen)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: var(--color-queued); border: 2px solid var(--node-stroke);"></div>
-                    <span>Queued (Discovered, waiting)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: var(--color-explored); border: 2px solid var(--text-muted);"></div>
-                    <span>Explored (Fully processed)</span>
-                </div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--color-undiscovered); border: 2px solid var(--node-stroke);"></div><span>Undiscovered (White)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--color-queued); border: 2px solid var(--node-stroke);"></div><span>Queued (Gray)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: var(--color-explored); border: 2px solid var(--text-muted);"></div><span>Explored (Black)</span></div>
             </div>
 
             <!-- Live Statistics -->
@@ -307,53 +313,56 @@
             <!-- Visual Queue -->
             <div class="panel-section" style="flex:1;">
                 <h2>Current Queue (FIFO)</h2>
-                <div class="queue-container" id="visual-queue"><span class="queue-empty">Queue is empty</span></div>
+                <div class="queue-wrapper">
+                    <span>Front &rarr;</span>
+                    <div class="queue-container" id="visual-queue"><span class="queue-empty">Queue is empty</span></div>
+                    <span>&larr; Back</span>
+                </div>
             </div>
         </aside>
 
-        <!-- Center Panel: Explanation & Graph -->
-        <main class="center-panel">
+        <!-- Right Panel: Explanation, Graph, Pseudocode, History -->
+        <main class="right-panel">
             <div class="step-explanation-box" id="step-explanation">Enter edges on the left, load the graph, and click "Build Algorithm".</div>
-            <div class="visualization-area">
-                <svg id="graph-svg" class="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
-                    <g id="edges-layer"></g>
-                    <g id="nodes-layer"></g>
-                </svg>
+            <div class="right-panel-content">
+                <div class="visualization-area">
+                    <svg id="graph-svg" class="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                        <g id="edges-layer"></g>
+                        <g id="nodes-layer"></g>
+                        <text id="v-pointer" class="pointer-label">v</text>
+                        <text id="w-pointer" class="pointer-label">w</text>
+                    </svg>
+                </div>
+                <div class="code-and-history-container">
+                    <div class="panel-section">
+                        <h2>Pseudocode</h2>
+                        <div class="pseudocode-container" id="pseudocode-box">
+                            <div class="code-line" id="line-1"><span class="line-num">1</span><span class="code-text">BFS(graph, S):</span><span class="code-tooltip">Define BFS function with graph and Start node S</span></div>
+                            <div class="code-line" id="line-2"><span class="line-num">2</span><span class="code-text">  let Q be a queue</span><span class="code-tooltip">Initialize a First-In-First-Out (FIFO) queue</span></div>
+                            <div class="code-line" id="line-3"><span class="line-num">3</span><span class="code-text">  Q.enqueue(S), dist[S] = 0</span><span class="code-tooltip">Add start node to queue, set its distance to 0</span></div>
+                            <div class="code-line" id="line-4"><span class="line-num">4</span><span class="code-text">  mark S as discovered</span><span class="code-tooltip">Mark start node gray so we don't revisit it</span></div>
+                            <div class="code-line" id="line-5"><span class="line-num">5</span><span class="code-text">  while Q is not empty:</span><span class="code-tooltip">Loop until every discovered node is processed</span></div>
+                            <div class="code-line" id="line-6"><span class="line-num">6</span><span class="code-text">    v = Q.dequeue()</span><span class="code-tooltip">Remove the oldest node from the front of the queue</span></div>
+                            <div class="code-line" id="line-7"><span class="line-num">7</span><span class="code-text">    mark v as explored</span><span class="code-tooltip">Mark node black (all its edges will be checked)</span></div>
+                            <div class="code-line" id="line-8"><span class="line-num">8</span><span class="code-text">    for all edges from v to w:</span><span class="code-tooltip">Iterate over all neighbors of the current node 'v'</span></div>
+                            <div class="code-line" id="line-9"><span class="line-num">9</span><span class="code-text">      if w is not discovered:</span><span class="code-tooltip">Check if neighbor 'w' is completely unseen (white)</span></div>
+                            <div class="code-line" id="line-10"><span class="line-num">10</span><span class="code-text">        mark w as discovered</span><span class="code-tooltip">Color 'w' gray to show we now know about it</span></div>
+                            <div class="code-line" id="line-11"><span class="line-num">11</span><span class="code-text">        dist[w] = dist[v] + 1</span><span class="code-tooltip">Shortest path to 'w' is one step further than 'v'</span></div>
+                            <div class="code-line" id="line-12"><span class="line-num">12</span><span class="code-text">        Q.enqueue(w)</span><span class="code-tooltip">Add 'w' to the back of the queue for later exploration</span></div>
+                        </div>
+                    </div>
+                    <div class="panel-section" style="flex:1; display: flex; flex-direction: column;">
+                        <h2>History Log</h2>
+                        <div class="history-container" id="history-box">
+                            <table id="history-table">
+                                <thead><tr><th style="width: 25%">Step</th><th>Action Log</th></tr></thead>
+                                <tbody id="history-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
-
-        <!-- Right Panel: Pseudocode & History -->
-        <aside class="right-panel">
-            <!-- Pseudocode Tracker -->
-            <div class="panel-section">
-                <h2>Pseudocode</h2>
-                <div class="pseudocode-container" id="pseudocode-box">
-                    <div class="code-line" id="line-1" title="Define the BFS function with graph and Start node S"><span class="line-num">1</span><span class="code-text">BFS(graph, S):</span></div>
-                    <div class="code-line" id="line-2" title="Initialize a First-In-First-Out (FIFO) queue"><span class="line-num">2</span><span class="code-text">  let Q be a queue</span></div>
-                    <div class="code-line" id="line-3" title="Add start node to queue, set its distance to 0"><span class="line-num">3</span><span class="code-text">  Q.enqueue(S), dist[S] = 0</span></div>
-                    <div class="code-line" id="line-4" title="Mark start node as seen so we don't visit it again"><span class="line-num">4</span><span class="code-text">  mark S as discovered</span></div>
-                    <div class="code-line" id="line-5" title="Loop continues until every discovered node is processed"><span class="line-num">5</span><span class="code-text">  while Q is not empty:</span></div>
-                    <div class="code-line" id="line-6" title="Remove the oldest node from the front of the queue"><span class="line-num">6</span><span class="code-text">    v = Q.dequeue()</span></div>
-                    <div class="code-line" id="line-7" title="Mark node as fully processed (all its edges will be checked)"><span class="line-num">7</span><span class="code-text">    mark v as explored</span></div>
-                    <div class="code-line" id="line-8" title="Iterate over all neighbors of the current node"><span class="line-num">8</span><span class="code-text">    for all edges from v to w:</span></div>
-                    <div class="code-line" id="line-9" title="Check if neighbor 'w' is completely unseen"><span class="line-num">9</span><span class="code-text">      if w is not discovered:</span></div>
-                    <div class="code-line" id="line-10" title="Color 'w' gray to show we know about it"><span class="line-num">10</span><span class="code-text">        mark w as discovered</span></div>
-                    <div class="code-line" id="line-11" title="The shortest path to 'w' is exactly one step further than 'v'"><span class="line-num">11</span><span class="code-text">        dist[w] = dist[v] + 1</span></div>
-                    <div class="code-line" id="line-12" title="Add 'w' to the back of the queue for later exploration"><span class="line-num">12</span><span class="code-text">        Q.enqueue(w)</span></div>
-                </div>
-            </div>
-
-            <!-- Action History Table -->
-            <div class="panel-section" style="flex:1; display: flex; flex-direction: column;">
-                <h2>History Log</h2>
-                <div class="history-container" id="history-box">
-                    <table id="history-table">
-                        <thead><tr><th style="width: 25%">Step</th><th>Action Log</th></tr></thead>
-                        <tbody id="history-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </aside>
     </div>
 
     <!-- BOTTOM: Educational Content -->
@@ -361,31 +370,47 @@
         <h2 class="edu-header">Course Learning Outcomes (CLOs)</h2>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab(event, 'clo1')">CLO-1: Complexity</button>
+            <button class="tab-btn active" onclick="openTab(event, 'overview')">Overview</button>
+            <button class="tab-btn" onclick="openTab(event, 'clo1')">CLO-1: Complexity</button>
             <button class="tab-btn" onclick="openTab(event, 'clo2')">CLO-2: Searching Strategy</button>
             <button class="tab-btn" onclick="openTab(event, 'clo3')">CLO-3: Paradigm & Shortest Paths</button>
             <button class="tab-btn" onclick="openTab(event, 'worked-example')">Worked Example</button>
         </div>
+        
+        <!-- Overview -->
+        <div id="overview" class="tab-content active">
+            <h3>Algorithm Overview</h3>
+            <p><strong>Breadth-First Search (BFS)</strong> is a fundamental graph traversal algorithm that explores vertices "layer by layer". It starts at a source vertex and explores all of its immediate neighbors first, before moving on to the next level of neighbors.</p>
+            <h4>How It Works</h4>
+            <p>The algorithm uses a First-In-First-Out (FIFO) queue to manage which vertex to visit next. It systematically colors vertices to keep track of its progress:</p>
+            <ul>
+                <li><strong>White:</strong> The vertex is undiscovered.</li>
+                <li><strong>Gray:</strong> The vertex has been discovered and is in the queue, waiting to be processed.</li>
+                <li><strong>Black:</strong> The vertex and all of its neighbors have been fully explored.</li>
+            </ul>
+            <h4>When to Use BFS</h4>
+            <p>BFS is the ideal algorithm for finding the <strong>shortest path (in terms of number of edges)</strong> between two vertices in an unweighted graph. Common applications include:</p>
+            <ul>
+                <li>Finding the shortest route in a GPS or mapping system (where all roads have equal "cost").</li>
+                <li>Discovering all nearby friends in a social network ("friends of friends").</li>
+                <li>Web crawlers discovering all pages reachable from a starting URL.</li>
+            </ul>
+        </div>
+
 
         <!-- CLO 1: Complexity -->
-        <div id="clo1" class="tab-content active">
+        <div id="clo1" class="tab-content">
             <h3>Complexity Analysis: O(V + E)</h3>
-            <p>The time complexity of Breadth-First Search is exactly proportional to the number of Vertices (V) and Edges (E) in the graph: <strong>O(V + E)</strong>.</p>
+            <p>The time complexity of Breadth-First Search is directly proportional to the number of Vertices (V) and Edges (E) in the graph: <strong>O(V + E)</strong>.</p>
             <ul>
-                <li><strong>Time Complexity:</strong>
-                    <ul>
-                        <li><em>Worst/Average Case: O(V + E)</em>. Every vertex is enqueued/dequeued once (O(V)), and every edge is examined exactly twice in an undirected graph (O(E)).</li>
-                        <li><em>Best Case: O(1)</em>. If the target node you are searching for happens to be the starting node, the algorithm terminates immediately.</li>
-                    </ul>
-                </li>
-                <li><strong>Space Complexity: O(V)</strong>. The FIFO queue and the tracking arrays (discovered state, distances) will need to store up to V vertices in the worst-case scenario (e.g., a "star" graph where the root connects to all other nodes at once).</li>
+                <li><strong>Time Complexity: O(V + E)</strong>. Every vertex is enqueued/dequeued once (O(V)), and every edge is examined once in a directed graph or twice in an undirected graph (O(E)).</li>
+                <li><strong>Space Complexity: O(V)</strong>. The FIFO queue may need to store up to V vertices in the worst-case (e.g., a "star" graph where the root connects to all other nodes).</li>
             </ul>
-            <p><strong>Compared to DFS:</strong> Depth-First Search shares the exact same worst-case time complexity, O(V + E), but explores in a different order (going deep instead of wide).</p>
-            <p><strong>Compared to Dijkstra's:</strong> Dijkstra's Algorithm handles weighted edges by using a Priority Queue, bringing its complexity to O((V + E) log V). BFS is much faster but only works for <em>unweighted</em> graphs.</p>
+            <p><strong>Compared to Dijkstra's:</strong> Dijkstra's Algorithm handles weighted edges by using a Priority Queue, bringing its complexity to O((V + E) log V). For unweighted graphs, BFS is significantly faster.</p>
             
             <div class="chart-box">
                 <h4>Interactive Growth Chart: Dense Graph (E ≈ V²/2)</h4>
-                <p style="font-size:0.9rem; color:var(--text-muted);">Compare theoretical BFS operations vs Dijkstra's Priority-Queue operations as input grows.</p>
+                <p style="font-size:0.9rem; color:var(--text-muted);">Compare actual vs. theoretical operations as input size (V) grows.</p>
                 <div style="margin: 1rem 0;">
                     <label>Vertices (V): <span id="chart-v-val" style="color:var(--accent);font-weight:bold;">10</span></label>
                     <input type="range" id="chart-slider" min="5" max="50" value="10" style="width: 200px; margin-left: 1rem;">
@@ -393,19 +418,20 @@
                 
                 <svg class="chart-svg" viewBox="0 -300 600 300"> 
                     <g transform="scale(1, -1)">
-                        <!-- Dijkstra Line -->
-                        <path id="chart-path-dij" class="chart-line-dij" d=""></path>
-                        <circle id="chart-dot-dij" class="chart-point" cx="0" cy="0" fill="var(--accent-alt)"></circle>
+                        <path id="chart-path-dij" class="chart-line chart-line-dij"></path>
+                        <path id="chart-path-bfs" class="chart-line chart-line-bfs"></path>
+                        <path id="chart-path-actual" class="chart-line chart-line-actual"></path>
                         
-                        <!-- BFS Line -->
-                        <path id="chart-path-bfs" class="chart-line-bfs" d=""></path>
-                        <circle id="chart-dot-bfs" class="chart-point" cx="0" cy="0" fill="var(--accent)"></circle>
+                        <circle id="chart-dot-dij" class="chart-point" fill="var(--accent-alt)"></circle>
+                        <circle id="chart-dot-bfs" class="chart-point" fill="var(--accent)"></circle>
+                        <circle id="chart-dot-actual" class="chart-point" fill="#fff"></circle>
                     </g>
                 </svg>
                 
                 <div class="chart-legend">
-                    <div class="legend-bfs">── BFS Operations O(V + E): <span id="chart-op-bfs">55</span></div>
-                    <div class="legend-dij">- - Dijkstra Operations O((V+E)logV): <span id="chart-op-dij">182</span></div>
+                    <div class="legend-item-chart"><div class="legend-line-sample" style="background-color: #fff; border: 1px dashed #555;"></div><span>Actual BFS Ops: <strong id="chart-op-actual" style="color:#fff;">55</strong></span></div>
+                    <div class="legend-item-chart"><div class="legend-line-sample" style="background-color: var(--accent);"></div><span>Theoretical O(V+E): <strong id="chart-op-bfs" style="color:var(--accent);">55</strong></span></div>
+                    <div class="legend-item-chart"><div class="legend-line-sample" style="background-color: var(--accent-alt);"></div><span>Dijkstra O((V+E)logV): <strong id="chart-op-dij" style="color:var(--accent-alt);">182</strong></span></div>
                 </div>
             </div>
         </div>
@@ -420,75 +446,39 @@
                 To achieve this perfect level-by-level traversal, BFS relies strictly on a First-In-First-Out (FIFO) Queue. When a node is discovered, it is placed at the back of the queue. Because it always pulls from the front, it guarantees that all nodes discovered at distance <em>d</em> are fully processed before the algorithm even looks at nodes at distance <em>d+1</em>.
             </div>
 
-            <p><strong>Impact of Changing the Searching Mechanism:</strong></p>
-            <p>If we alter the algorithm by removing the Queue and replacing it with a Last-In-First-Out (LIFO) Stack, the entire behavior fundamentally breaks. The algorithm transforms into Depth-First Search (DFS). The critical impact of this change is that <strong>we completely lose the shortest-path guarantee</strong>. A Stack-based search will plunge deep down a single branch, potentially taking 10 edges to reach a node that was sitting right next to the root, assigning it a completely incorrect "distance".</p>
+            <p><strong>Impact of Changing the Searching Mechanism:</strong> If we replace the Queue with a Last-In-First-Out (LIFO) Stack, the algorithm becomes Depth-First Search (DFS). The critical impact of this change is that <strong>we completely lose the shortest-path guarantee</strong>. A Stack-based search will plunge deep down a single branch, potentially taking a long path to a node that was right next to the start.</p>
         </div>
 
         <!-- CLO 3: Paradigm -->
         <div id="clo3" class="tab-content">
             <h3>Paradigm: Greedy-Like Shortest Paths</h3>
-            <p>BFS is effectively a <strong>Greedy-like strategy</strong> for unweighted graphs. At every step, it makes the locally optimal choice by exploring the absolute nearest unvisited nodes first.</p>
-            <p>Because it expands evenly, the moment BFS discovers a target node, it is guaranteed to have found the <strong>shortest path</strong> to that node (in terms of fewest edges). Look closely at the visualization above: as nodes turn queued/gray, a distance label (<code>d=...</code>) is stamped next to them. This distance is permanently optimal.</p>
+            <p>BFS is effectively a <strong>Greedy-like strategy</strong> for unweighted graphs. At every step, it makes the locally optimal choice by exploring the absolute nearest (one edge away) unvisited nodes first.</p>
+            <p>Because it expands evenly, the moment BFS discovers a target node, it is guaranteed to have found the <strong>shortest path</strong> to that node. Notice in the visualization how the distance label `d=...` is set once and is permanently optimal.</p>
             
             <div class="key-concept-box" style="border-left-color: var(--accent-alt);">
                 <strong style="color: var(--accent-alt);">Counterexample: BFS vs DP (Bellman-Ford) on Weighted Graphs</strong>
-                Consider a triangle graph with nodes A, B, and C. The edge from A-C has a massive cost of 10. The edges A-B and B-C each have a small cost of 1. 
-                <br><br>
-                If we use BFS to find the shortest path from A to C, it acts greedily purely on edge count. It sees C is 1 edge away, so it immediately declares the shortest path to C is A->C (Total cost: 10). <strong>This is wrong!</strong>
-                <br><br>
-                If we instead use the <strong>Dynamic Programming paradigm (Bellman-Ford Algorithm)</strong>, it systematically evaluates overlapping sub-problems and edge relaxations. It realizes that going A->B (cost 1) and then B->C (cost 1) yields a true shortest path of A->B->C (Total cost: 2).
+                Consider a graph A-C (cost 10), A-B (cost 1), and B-C (cost 1). If we use BFS to find the shortest path from A to C, it greedily sees the direct path A->C is only 1 edge and declares it the shortest. This is wrong (cost 10). A <strong>Dynamic Programming algorithm (Bellman-Ford)</strong> would correctly find the path A->B->C (cost 2).
             </div>
         </div>
 
         <!-- Worked Example -->
         <div id="worked-example" class="tab-content">
             <h3>Step-by-Step: BFS on a Tree</h3>
-            <p>Let's trace the algorithm using the <strong>Tree preset</strong>. The tree edges are: A-B, A-C, B-D, B-E, C-F, C-G. We begin our search starting at the root node, <strong>A</strong>.</p>
+            <p>Let's trace the algorithm using the <strong>Tree preset</strong>, starting at the root node, <strong>A</strong>.</p>
             
             <div style="margin-top: 1.5rem;">
-                <p><strong>Step 1: Initialization</strong></p>
-                <ul>
-                    <li>Start at <strong>A</strong>. Mark A as discovered (distance = 0) and add it to the queue.</li>
-                    <li><em>Current Queue:</em> <code>[A]</code></li>
-                </ul>
-
-                <p><strong>Step 2: Process Level 0 (Node A)</strong></p>
-                <ul>
-                    <li>Dequeue <strong>A</strong>. Explore its neighbors: <strong>B</strong> and <strong>C</strong>.</li>
-                    <li>Mark B and C as discovered (distance = 1), and enqueue them. Mark A as fully explored.</li>
-                    <li><em>Current Queue:</em> <code>[B, C]</code></li>
-                </ul>
-
-                <p><strong>Step 3: Process Level 1 (Node B)</strong></p>
-                <ul>
-                    <li>Dequeue <strong>B</strong>. Explore its neighbors: <strong>D</strong> and <strong>E</strong>.</li>
-                    <li>Mark D and E as discovered (distance = 2), and enqueue them. Mark B as fully explored.</li>
-                    <li><em>Current Queue:</em> <code>[C, D, E]</code></li>
-                </ul>
-
-                <p><strong>Step 4: Process Level 1 (Node C)</strong></p>
-                <ul>
-                    <li>Dequeue <strong>C</strong>. Explore its neighbors: <strong>F</strong> and <strong>G</strong>.</li>
-                    <li>Mark F and G as discovered (distance = 2), and enqueue them. Mark C as fully explored.</li>
-                    <li><em>Current Queue:</em> <code>[D, E, F, G]</code></li>
-                </ul>
-
-                <p><strong>Step 5+: Process Level 2 (Leaf Nodes)</strong></p>
-                <ul>
-                    <li>Dequeue <strong>D, E, F,</strong> and <strong>G</strong> one by one. None of them have any undiscovered neighbors.</li>
-                    <li>Each node is simply marked as fully explored.</li>
-                    <li><em>Final Queue:</em> <code>[]</code> (Empty)</li>
-                </ul>
+                <p><strong>Step 1: Init</strong> &rarr; Start at <strong>A</strong>. Mark it gray (distance = 0) and add to queue. <em>Queue: [A]</em></p>
+                <p><strong>Step 2: Dequeue A</strong> &rarr; Explore its neighbors: <strong>B</strong> and <strong>C</strong>. Mark them gray (distance = 1) and enqueue. Mark A black. <em>Queue: [B, C]</em></p>
+                <p><strong>Step 3: Dequeue B</strong> &rarr; Explore its neighbors: <strong>D</strong> and <strong>E</strong>. Mark them gray (distance = 2) and enqueue. Mark B black. <em>Queue: [C, D, E]</em></p>
+                <p><strong>Step 4: Dequeue C</strong> &rarr; Explore its neighbors: <strong>F</strong> and <strong>G</strong>. Mark them gray (distance = 2) and enqueue. Mark C black. <em>Queue: [D, E, F, G]</em></p>
+                <p><strong>Step 5+: Dequeue Leaves</strong> &rarr; Dequeue <strong>D, E, F,</strong> and <strong>G</strong> one by one. None have undiscovered neighbors. Mark each black. The queue empties.</p>
             </div>
-            <p style="margin-top: 1.5rem; color: var(--accent); font-weight: bold;">Once the queue is completely empty, the while loop terminates and the BFS algorithm is complete!</p>
+            <p style="margin-top: 1.5rem; color: var(--accent); font-weight: bold;">Once the queue is empty, the algorithm terminates, having found all shortest paths from A.</p>
         </div>
     </div>
 
     <script>
-        /* =========================================
-           DATA & PRESETS
-           ========================================= */
-        const svgNS = "http://www.w3.org/2000/svg"; // CRITICAL BUG FIX
+        const svgNS = "http://www.w3.org/2000/svg";
 
         const presets = {
             standard: "A-B\nA-C\nB-D\nB-G\nC-G\nC-E\nD-F\nE-F\nG-D",
@@ -497,6 +487,7 @@
         };
 
         let graphData = { nodes: [], edges: [] };
+        let nodeLookup = {};
         let adjList = {};
 
         // DOM Elements
@@ -504,6 +495,8 @@
         const nodesLayer = document.getElementById('nodes-layer');
         const graphInput = document.getElementById('graph-input');
         const warningText = document.getElementById('worst-case-warning');
+        const vPointer = document.getElementById('v-pointer');
+        const wPointer = document.getElementById('w-pointer');
         
         const btnApply = document.getElementById('btn-apply-graph');
         const btnBuild = document.getElementById('btn-build');
@@ -518,7 +511,7 @@
         const stepExplanation = document.getElementById('step-explanation');
         const statDiscovered = document.getElementById('stat-discovered');
         const statEdges = document.getElementById('stat-edges');
-        const historyBox = document.getElementById('history-box'); // DOM BUG FIX
+        const historyBox = document.getElementById('history-box');
         const historyBody = document.getElementById('history-body');
 
         // State
@@ -531,7 +524,7 @@
         /* =========================================
            GRAPH PARSING & LAYOUT
            ========================================= */
-        function parseGraphInput(text) {
+        function parseAndLayoutGraph(text, presetName = null) {
             const lines = text.trim().split('\n');
             const edgeSet = [];
             const nodeSet = new Set();
@@ -546,31 +539,31 @@
                 }
             });
 
-            const uniqueEdges = [];
-            const edgeMap = new Set();
-            edgeSet.forEach(e => {
-                const key = `${e.source}-${e.target}`;
-                if (!edgeMap.has(key)) {
-                    edgeMap.add(key);
-                    uniqueEdges.push(e);
-                }
-            });
-
+            const uniqueEdges = Array.from(new Set(edgeSet.map(e => `${e.source}-${e.target}`))).map(s => ({ source: s.split('-')[0], target: s.split('-')[1] }));
             const nodesList = Array.from(nodeSet).sort();
             
-            const centerX = 400, centerY = 300, radius = 220;
-            const nodes = nodesList.map((id, index) => {
-                const angle = (index * (2 * Math.PI) / nodesList.length) - Math.PI/2;
-                return {
-                    id: id,
-                    x: centerX + radius * Math.cos(angle),
-                    y: centerY + radius * Math.sin(angle)
-                };
-            });
-
+            let nodes;
+            // Tree preset specific layout
+            if (presetName === 'tree' && nodesList.join('') === "ABCDEFG") {
+                 nodes = [
+                    { id: 'A', x: 400, y: 100 }, { id: 'B', x: 250, y: 250 },
+                    { id: 'C', x: 550, y: 250 }, { id: 'D', x: 175, y: 400 },
+                    { id: 'E', x: 325, y: 400 }, { id: 'F', x: 475, y: 400 },
+                    { id: 'G', x: 625, y: 400 }
+                ];
+            } else { // Default circular layout
+                const centerX = 400, centerY = 300, radius = 220;
+                nodes = nodesList.map((id, index) => {
+                    const angle = (index * (2 * Math.PI) / nodesList.length) - Math.PI/2;
+                    return { id, x: centerX + radius * Math.cos(angle), y: centerY + radius * Math.sin(angle) };
+                });
+            }
+            
+            nodeLookup = {};
+            nodes.forEach(n => nodeLookup[n.id] = n);
             return { nodes, edges: uniqueEdges };
         }
-
+        
         function buildAdjacencyList() {
             adjList = {};
             graphData.nodes.forEach(n => adjList[n.id] = []);
@@ -581,20 +574,18 @@
             for (let key in adjList) adjList[key].sort(); 
         }
 
-        function loadCustomGraph() {
+        function loadGraph(text, presetName = null) {
             resetApp();
-            const rawText = graphInput.value;
-            graphData = parseGraphInput(rawText);
+            graphData = parseAndLayoutGraph(text, presetName);
             
             const V = graphData.nodes.length;
             const E = graphData.edges.length;
-            if (V > 3 && E >= (V * (V - 1)) / 4) warningText.style.display = 'block';
-            else warningText.style.display = 'none';
+            warningText.style.display = (V > 3 && E >= (V * (V - 1)) / 4) ? 'block' : 'none';
 
             buildAdjacencyList();
             renderInitialGraph();
             stepExplanation.textContent = `Graph loaded with ${V} vertices and ${E} edges. Ready to build.`;
-            btnBuild.disabled = false;
+            btnBuild.disabled = V === 0;
         }
 
         /* =========================================
@@ -604,11 +595,10 @@
             edgesLayer.innerHTML = '';
             nodesLayer.innerHTML = '';
             
-            const nodeLookup = {};
-            graphData.nodes.forEach(n => nodeLookup[n.id] = n);
-
             graphData.edges.forEach(edge => {
                 const line = document.createElementNS(svgNS, 'line');
+                const [s, t] = [edge.source, edge.target].sort();
+                line.id = `edge-${s}-${t}`;
                 line.setAttribute('x1', nodeLookup[edge.source].x);
                 line.setAttribute('y1', nodeLookup[edge.source].y);
                 line.setAttribute('x2', nodeLookup[edge.target].x);
@@ -624,17 +614,15 @@
                 group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
 
                 const circle = document.createElementNS(svgNS, 'circle');
-                
                 const text = document.createElementNS(svgNS, 'text');
                 text.textContent = node.id;
                 text.classList.add('node-id');
-                text.setAttribute('dy', '0.1em'); 
+                text.setAttribute('dy', '0.1em');
                 
                 const distText = document.createElementNS(svgNS, 'text');
                 distText.classList.add('dist-label');
                 distText.setAttribute('id', `dist-${node.id}`);
                 distText.setAttribute('dy', '-30');
-                distText.setAttribute('dx', '30');
                 distText.textContent = ''; 
 
                 group.appendChild(circle);
@@ -656,17 +644,17 @@
             let queue = [];
             let stats = { discovered: 0, edges: 0 };
 
-            const addSnap = (line, msg, logMsg, actClass) => {
+            const addSnap = (line, msg, logMsg, actClass, pointers = {}) => {
                 snapshots.push({
                     nodeStates: { ...states }, queueState: [...queue], distances: { ...distances },
-                    stats: { ...stats }, activeLine: line, explanation: msg, logMsg: logMsg, actionClass: actClass
+                    stats: { ...stats }, activeLine: line, explanation: msg, logMsg: logMsg, 
+                    actionClass: actClass, pointers: { v: pointers.v || null, w: pointers.w || null, edge: pointers.edge || null }
                 });
             };
 
+            const start = graphData.nodes[0].id;
             addSnap(1, "Initializing algorithm...", "Initialize BFS", "hist-init");
             addSnap(2, "Initializing empty Queue (Q).", "Create Queue", "hist-init");
-
-            const start = graphData.nodes[0].id; 
             
             queue.push(start);
             distances[start] = 0;
@@ -679,33 +667,34 @@
             while (queue.length > 0) {
                 addSnap(5, `Queue has ${queue.length} item(s). Continuing loop.`, "Check Queue", "hist-init");
 
-                let curr = queue.shift();
-                addSnap(6, `Dequeued ${curr}.`, `Dequeue ${curr}`, "hist-dequeue");
+                let v = queue.shift();
+                addSnap(6, `Dequeued ${v}. This is now node 'v'.`, `Dequeue ${v}`, "hist-dequeue", { v });
 
-                states[curr] = 'explored';
-                addSnap(7, `Marking ${curr} as fully explored.`, `Explore ${curr}`, "hist-explore");
+                states[v] = 'explored';
+                addSnap(7, `Marking 'v' (${v}) as fully explored.`, `Explore ${v}`, "hist-explore", { v });
 
-                const neighbors = adjList[curr];
-                addSnap(8, `Checking neighbors of ${curr}: [${neighbors.join(', ')}]`, `Check neighbors`, "hist-init");
+                const neighbors = adjList[v];
+                addSnap(8, `Checking neighbors of ${v}: [${neighbors.join(', ')}]`, `Check neighbors`, "hist-init", { v });
 
-                neighbors.forEach(neighbor => {
+                for(const w of neighbors) {
                     stats.edges++;
-                    addSnap(9, `Is ${neighbor} undiscovered?`, `Check ${neighbor}`, "hist-init");
+                    const edgeKey = [v, w].sort().join('-');
+                    addSnap(9, `Checking neighbor 'w' (${w}). Is it undiscovered?`, `Check ${w}`, "hist-init", { v, w, edge: edgeKey });
 
-                    if (states[neighbor] === 'undiscovered') {
-                        states[neighbor] = 'queued';
+                    if (states[w] === 'undiscovered') {
+                        states[w] = 'queued';
                         stats.discovered++;
-                        addSnap(10, `${neighbor} is undiscovered. Marking discovered.`, `Discover ${neighbor}`, "hist-discover");
+                        addSnap(10, `${w} is undiscovered. Marking discovered.`, `Discover ${w}`, "hist-discover", { v, w, edge: edgeKey });
 
-                        distances[neighbor] = distances[curr] + 1;
-                        addSnap(11, `Shortest path to ${neighbor} found: distance = ${distances[neighbor]}.`, `Dist ${neighbor}=${distances[neighbor]}`, "hist-init");
+                        distances[w] = distances[v] + 1;
+                        addSnap(11, `Shortest path to ${w} found: distance = ${distances[w]}.`, `Dist ${w}=${distances[w]}`, "hist-init", { v, w, edge: edgeKey });
 
-                        queue.push(neighbor);
-                        addSnap(12, `Adding ${neighbor} to queue.`, `Enqueue ${neighbor}`, "hist-enqueue");
+                        queue.push(w);
+                        addSnap(12, `Adding ${w} to queue.`, `Enqueue ${w}`, "hist-enqueue", { v, w, edge: edgeKey });
                     } else {
-                        addSnap(9, `${neighbor} already seen. Skipping.`, `Skip ${neighbor}`, "hist-init");
+                        addSnap(9, `${w} already seen. Skipping.`, `Skip ${w}`, "hist-init", { v, w, edge: edgeKey });
                     }
-                });
+                }
             }
             addSnap(5, "Queue empty. BFS complete.", "Done", "hist-init");
         }
@@ -717,25 +706,41 @@
             if (index < 0 || index >= snapshots.length) return;
             const snap = snapshots[index];
 
-            graphData.nodes.forEach(node => {
+            // Update nodes and distance labels
+            for(const node of graphData.nodes) {
                 const el = document.getElementById(`node-${node.id}`);
                 el.setAttribute('class', `node node-${snap.nodeStates[node.id]}`);
-                
-                const d = snap.distances[node.id];
-                const dText = document.getElementById(`dist-${node.id}`);
-                dText.textContent = d !== null ? `d=${d}` : '';
-            });
+                document.getElementById(`dist-${node.id}`).textContent = snap.distances[node.id] !== null ? `d=${snap.distances[node.id]}` : '';
+            }
 
-            visualQueue.innerHTML = snap.queueState.length === 0 ? `<span class="queue-empty">Queue is empty</span>` : '';
-            snap.queueState.forEach(id => {
-                const div = document.createElement('div'); div.classList.add('queue-item'); div.textContent = id; visualQueue.appendChild(div);
+            // Update visual pointers (v and w)
+            ['v', 'w'].forEach(p => {
+                const pointerEl = document.getElementById(`${p}-pointer`);
+                const nodeId = snap.pointers[p];
+                if (nodeId) {
+                    const {x, y} = nodeLookup[nodeId];
+                    pointerEl.setAttribute('transform', `translate(${x}, ${y - 40})`);
+                    pointerEl.style.opacity = 1;
+                } else {
+                    pointerEl.style.opacity = 0;
+                }
             });
+            
+            // Update active edge
+            document.querySelectorAll('.edge').forEach(e => e.classList.remove('edge-active'));
+            if(snap.pointers.edge) {
+                const [s,t] = snap.pointers.edge.split('-');
+                document.getElementById(`edge-${s}-${t}`)?.classList.add('edge-active');
+            }
 
+            // Update UI components
+            visualQueue.innerHTML = snap.queueState.length === 0 ? `<span class="queue-empty">Queue is empty</span>` : snap.queueState.map(id => `<div class="queue-item">${id}</div>`).join('');
             stepExplanation.textContent = snap.explanation;
             statDiscovered.textContent = snap.stats.discovered;
             statEdges.textContent = snap.stats.edges;
             stepCounter.textContent = `Step ${index} / ${snapshots.length - 1}`;
 
+            // Update pseudocode highlight
             document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active-line'));
             const activeCodeEl = document.getElementById(`line-${snap.activeLine}`);
             if (activeCodeEl) {
@@ -745,6 +750,7 @@
 
             renderHistoryTable(index);
 
+            // Final state handling
             if (index === snapshots.length - 1) {
                 pausePlayback();
                 statusText.textContent = 'Done';
@@ -754,7 +760,6 @@
 
         function renderHistoryTable(currentIndex) {
             historyBody.innerHTML = '';
-            // Only keep last 25 steps so it doesn't get infinitely long
             const startLimit = Math.max(0, currentIndex - 25);
             
             for (let i = startLimit; i <= currentIndex; i++) {
@@ -774,21 +779,19 @@
             historyBox.scrollTop = historyBox.scrollHeight;
         }
 
-        function executeStep() {
-            if (currentStep < snapshots.length - 1) { currentStep++; applySnapshot(currentStep); }
-        }
-
+        function executeStep() { if (currentStep < snapshots.length - 1) { currentStep++; applySnapshot(currentStep); } }
         function playPlayback() {
             if (currentStep >= snapshots.length - 1) return;
             isPlaying = true; statusText.textContent = 'Playing';
             btnPlay.disabled = true; btnStep.disabled = true; btnPause.disabled = false;
             
-            playTimerId = setTimeout(function loop() {
+            const loop = () => {
                 executeStep();
                 if (isPlaying && currentStep < snapshots.length - 1) {
                     playTimerId = setTimeout(loop, baseInterval / parseFloat(document.getElementById('speed-slider').value));
                 }
-            }, baseInterval / parseFloat(document.getElementById('speed-slider').value));
+            };
+            loop();
         }
 
         function pausePlayback() {
@@ -806,18 +809,18 @@
             historyBody.innerHTML = '';
             document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active-line'));
             statusText.textContent = 'Idle';
-            btnBuild.disabled = false; btnStep.disabled = true; btnPlay.disabled = true; btnPause.disabled = true;
+            btnBuild.disabled = true; btnStep.disabled = true; btnPlay.disabled = true; btnPause.disabled = true;
             if(graphData.nodes.length > 0) renderInitialGraph();
         }
 
         /* =========================================
            EVENT LISTENERS & TAB LOGIC
            ========================================= */
-        document.getElementById('preset-std').onclick = () => { graphInput.value = presets.standard; loadCustomGraph(); };
-        document.getElementById('preset-tree').onclick = () => { graphInput.value = presets.tree; loadCustomGraph(); };
-        document.getElementById('preset-dense').onclick = () => { graphInput.value = presets.dense; loadCustomGraph(); };
+        document.getElementById('preset-std').onclick = () => { graphInput.value = presets.standard; loadGraph(presets.standard, 'standard'); };
+        document.getElementById('preset-tree').onclick = () => { graphInput.value = presets.tree; loadGraph(presets.tree, 'tree'); };
+        document.getElementById('preset-dense').onclick = () => { graphInput.value = presets.dense; loadGraph(presets.dense, 'dense'); };
         
-        btnApply.onclick = loadCustomGraph;
+        btnApply.onclick = () => loadGraph(graphInput.value, 'custom');
         
         btnBuild.onclick = () => {
             buildBfsSteps(); currentStep = 0; applySnapshot(0);
@@ -828,12 +831,9 @@
         btnStep.onclick = () => { executeStep(); if (currentStep < snapshots.length - 1) statusText.textContent = 'Paused'; };
         btnPlay.onclick = playPlayback;
         btnPause.onclick = pausePlayback;
-        btnReset.onclick = loadCustomGraph;
+        btnReset.onclick = () => loadGraph(graphInput.value);
 
-        document.getElementById('speed-slider').oninput = (e) => {
-            document.getElementById('speed-display').textContent = `${parseFloat(e.target.value).toFixed(2)}x`;
-        };
-
+        document.getElementById('speed-slider').oninput = (e) => { document.getElementById('speed-display').textContent = `${parseFloat(e.target.value).toFixed(2)}x`; };
         function openTab(evt, tabId) {
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
@@ -842,46 +842,58 @@
         }
 
         /* =========================================
-           CHART LOGIC (CLO-1) - Dual Lines
+           CHART LOGIC (CLO-1) - Actual vs Theoretical
            ========================================= */
         const chartSlider = document.getElementById('chart-slider');
+        const actualDataPoints = [];
+        
+        function runHiddenBfs(v) {
+            const e = (v * (v - 1)) / 2;
+            return v + e; // In a full traversal of a dense graph, operations are exactly V+E
+        }
+
+        function precomputeChartData() {
+            for (let v = 5; v <= 50; v++) {
+                actualDataPoints.push(runHiddenBfs(v));
+            }
+        }
+        
         function drawChart() {
             const V = parseInt(chartSlider.value);
             document.getElementById('chart-v-val').textContent = V;
             
-            // Assume dense graph for worst case comparison E = V*(V-1)/2
             const E = (V * (V - 1)) / 2;
             const bfsOp = V + E;
-            
-            // Dijkstra's theoretical: (V + E) log2 V
+            const actualOp = runHiddenBfs(V);
             const dijOp = Math.round((V + E) * Math.log2(V));
 
+            document.getElementById('chart-op-actual').textContent = actualOp;
             document.getElementById('chart-op-bfs').textContent = bfsOp;
             document.getElementById('chart-op-dij').textContent = dijOp;
             
-            let dStringBFS = "M 0 0 ";
-            let dStringDij = "M 0 0 ";
+            let pathBFS = "M 60 0 "; let pathDij = "M 60 0 "; let pathActual = "M 60 0 ";
+            const scaleY = 300 / (7500); // Scale based on max Dijkstra ops
+            const scaleX = 540 / 45; // 600-60 / 50-5
             
-            // Max Operations for Dijkstra at V=50 is roughly ~7200.
-            // SVG height is 300. Scale factor = 300 / 7500 = 0.04
-            const scaleY = 0.04;
-            
-            for(let v = 5; v <= 50; v++) {
+            for(let v_idx = 0; v_idx <= 45; v_idx++) {
+                let v = v_idx + 5;
                 let e = (v * (v - 1)) / 2;
                 let opBfs = v + e;
                 let opDij = (v + e) * Math.log2(v);
+                let opActual = actualDataPoints[v_idx];
                 
-                dStringBFS += `L ${v * 12} ${opBfs * scaleY} `;
-                dStringDij += `L ${v * 12} ${opDij * scaleY} `;
+                const x = v_idx * scaleX + 60;
+                pathActual += `L ${x} ${opActual * scaleY} `;
+                pathBFS += `L ${x} ${opBfs * scaleY} `;
+                pathDij += `L ${x} ${opDij * scaleY} `;
             }
             
-            document.getElementById('chart-path-bfs').setAttribute('d', dStringBFS);
-            document.getElementById('chart-dot-bfs').setAttribute('cx', V * 12);
-            document.getElementById('chart-dot-bfs').setAttribute('cy', bfsOp * scaleY);
-            
-            document.getElementById('chart-path-dij').setAttribute('d', dStringDij);
-            document.getElementById('chart-dot-dij').setAttribute('cx', V * 12);
-            document.getElementById('chart-dot-dij').setAttribute('cy', dijOp * scaleY);
+            const currentX = (V - 5) * scaleX + 60;
+            ['actual', 'bfs', 'dij'].forEach(type => {
+                document.getElementById(`chart-path-${type}`).setAttribute('d', eval(`path${type.charAt(0).toUpperCase() + type.slice(1)}`));
+                document.getElementById(`chart-dot-${type}`).setAttribute('cx', currentX);
+                document.getElementById(`chart-dot-${type}`).setAttribute('cy', eval(`${type}Op`) * scaleY);
+            });
         }
         chartSlider.addEventListener('input', drawChart);
 
@@ -889,11 +901,12 @@
            INIT
            ========================================= */
         document.addEventListener('DOMContentLoaded', () => {
+            precomputeChartData();
             graphInput.value = presets.standard;
-            loadCustomGraph();
+            loadGraph(presets.standard, 'standard');
             drawChart();
+            openTab({currentTarget: document.querySelector('.tab-btn')}, 'overview');
         });
-
     </script>
 </body>
 </html>
