@@ -118,9 +118,22 @@
         h1 { font-size: 1.5rem; color: var(--accent); }
         h2 { font-size: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Legend Styles */
-        .legend-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem; margin-bottom: 0.2rem; }
-        .legend-color { width: 18px; height: 18px; border-radius: 50%; }
+        /* Floating Legend (Moved to Right Panel) */
+        .floating-legend {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(31, 40, 51, 0.85); /* Matches panel-bg with slight transparency */
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .floating-legend h3 { font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--accent); text-transform: uppercase; }
+        .legend-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; margin-bottom: 0.3rem; }
+        .legend-color { width: 16px; height: 16px; border-radius: 50%; }
 
         /* Buttons & Inputs */
         .btn-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -149,7 +162,7 @@
         .queue-wrapper { display: flex; align-items: center; gap: 0.5rem; }
         .queue-wrapper > span { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
         .queue-container { display: flex; gap: 0.5rem; min-height: 40px; align-items: center; overflow-x: auto; padding-bottom: 0.5rem; flex: 1; }
-        .queue-item { min-width: 35px; height: 35px; border-radius: 4px; background-color: var(--color-queued); color: var(--text-dark-bg); display: flex; align-items: center; justify-content: center; font-weight: bold; animation: popIn 0.3s ease forwards; }
+        .queue-item { min-width: 35px; height: 35px; border-radius: 4px; background-color: var(--color-queued); color: var(--text-dark-bg); display: flex; align-items: center; justify-content: center; font-weight: bold; animation: popIn 0.2s ease forwards; }
         .queue-empty { color: var(--text-muted); font-size: 0.9rem; font-style: italic; }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -157,18 +170,18 @@
            Right Panel: Visuals & Code
            ========================================= */
         .step-explanation-box { background-color: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 1.5rem; text-align: center; font-size: 1.1rem; min-height: 80px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
-        .visualization-area { flex: 2; display: flex; align-items: center; justify-content: center; padding: 1rem; border: 1px solid rgba(69, 162, 158, 0.3); border-radius: 8px; background: rgba(0,0,0,0.2); }
-        svg.graph-svg { width: 100%; height: 100%; max-width: 800px; max-height: 600px; }
+        .visualization-area { flex: 2; position: relative; display: flex; align-items: center; justify-content: center; padding: 1rem; border: 1px solid rgba(69, 162, 158, 0.3); border-radius: 8px; background: rgba(0,0,0,0.2); }
+        svg.graph-svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; }
         
-        /* Graph Elements */
-        .edge { stroke: var(--edge-color); stroke-width: 3px; transition: stroke 0.3s ease, stroke-width 0.3s ease; }
+        /* Graph Elements (Transitions reduced to 0.2s for max speed stability) */
+        .edge { stroke: var(--edge-color); stroke-width: 3px; transition: stroke 0.2s ease, stroke-width 0.2s ease; }
         .edge-active { stroke: var(--edge-active-color); stroke-width: 5px; }
         
-        .node circle { r: 22px; stroke-width: 3px; transition: fill 0.3s ease, stroke 0.3s ease; }
-        .node text.node-id { font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill 0.3s ease; }
-        .dist-label { font-size: 14px; font-weight: bold; fill: #ffeb3b; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; text-shadow: 1px 1px 2px #000; }
+        .node circle { r: 22px; stroke-width: 3px; transition: fill 0.2s ease, stroke 0.2s ease; }
+        .node text.node-id { font-size: 16px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; transition: fill 0.2s ease; }
+        .dist-label { font-size: 14px; font-weight: bold; fill: #ffeb3b; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; text-shadow: 1px 1px 2px #000; }
         
-        .pointer-label { font-size: 20px; font-weight: bold; fill: var(--accent); opacity: 0; transition: opacity 0.3s, transform 0.3s; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 3px #000;}
+        .pointer-label { font-size: 20px; font-weight: bold; fill: var(--accent); opacity: 0; transition: opacity 0.2s, transform 0.2s; text-anchor: middle; pointer-events: none; text-shadow: 1px 1px 3px #000;}
 
         /* Node State Colors */
         .node-undiscovered circle { fill: var(--color-undiscovered); stroke: var(--node-stroke); }
@@ -200,7 +213,7 @@
             background-color: var(--code-bg);
             border-radius: 6px;
             border: 1px solid rgba(69,162,158,0.3);
-            min-height: 0; /* THE FIX: Allows the flex item to shrink and enable scrolling */
+            min-height: 0;
         }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -239,12 +252,12 @@
 
         /* SVG Chart */
         .chart-box { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1.5rem; text-align: center; }
-        .chart-svg { width: 100%; max-width: 600px; height: 300px; background: #111; border-bottom: 2px solid #fff; border-left: 2px solid #fff; margin-bottom: 1rem; }
-        .chart-line { stroke-width: 3; fill: none; transition: d 0.3s ease; }
+        .chart-svg { width: 100%; max-width: 600px; height: 300px; background: #111; margin-bottom: 1rem; }
+        .chart-line { stroke-width: 3; fill: none; transition: d 0.2s ease; }
         .chart-line-actual { stroke: #fff; stroke-dasharray: 2,4; }
         .chart-line-bfs { stroke: var(--accent); }
         .chart-line-dij { stroke: var(--accent-alt); stroke-dasharray: 5,5; }
-        .chart-point { r: 6; transition: cx 0.3s, cy 0.3s; }
+        .chart-point { r: 6; transition: cx 0.2s, cy 0.2s; }
         
         .chart-legend { display: flex; justify-content: center; gap: 1.5rem; font-size: 0.9rem; flex-wrap: wrap; }
         .legend-item-chart { display: flex; align-items: center; gap: 0.5rem; }
@@ -270,10 +283,11 @@
                     <button id="preset-std">Standard</button>
                     <button id="preset-tree">Tree</button>
                     <button id="preset-dense">Worst-Case</button>
+                    <button id="preset-weighted" style="flex: 1 1 100%; background-color: var(--accent-alt); color: #000;">Weighted (Fails)</button>
                 </div>
                 <textarea id="graph-input" rows="5" placeholder="Format: A-B"></textarea>
                 <div id="worst-case-warning" class="warning-text">Dense graph selected! Expect O(V²) max complexity due to dense edges.</div>
-                <button id="btn-apply-graph" style="flex: 1 1 100%; background-color: var(--panel-bg); border: 1px solid var(--accent); color: var(--accent);">Load Custom Graph</button>
+                <button id="btn-apply-graph" style="flex: 1 1 100%; background-color: var(--panel-bg); border: 1px solid var(--accent); color: var(--accent); transition: 0.3s;">Load Custom Graph</button>
             </div>
 
             <!-- Controls -->
@@ -293,14 +307,6 @@
                     <input type="range" id="speed-slider" min="0.25" max="4" step="0.25" value="1">
                     <span class="info-value" id="speed-display">1.00x</span>
                 </div>
-            </div>
-
-            <!-- Color-Coded Legend -->
-            <div class="panel-section">
-                <h2>Node States</h2>
-                <div class="legend-item"><div class="legend-color" style="background: var(--color-undiscovered); border: 2px solid var(--node-stroke);"></div><span>Undiscovered (White)</span></div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--color-queued); border: 2px solid var(--node-stroke);"></div><span>Queued (Gray)</span></div>
-                <div class="legend-item"><div class="legend-color" style="background: var(--color-explored); border: 2px solid var(--text-muted);"></div><span>Explored (Black)</span></div>
             </div>
 
             <!-- Live Statistics -->
@@ -326,6 +332,15 @@
             <div class="step-explanation-box" id="step-explanation">Enter edges on the left, load the graph, and click "Build Algorithm".</div>
             <div class="right-panel-content">
                 <div class="visualization-area">
+                    
+                    <!-- Floating Legend inside visualization area -->
+                    <div class="floating-legend">
+                        <h3>Node States</h3>
+                        <div class="legend-item"><div class="legend-color" style="background: var(--color-undiscovered); border: 2px solid var(--node-stroke);"></div><span>Undiscovered (White)</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background: var(--color-queued); border: 2px solid var(--node-stroke);"></div><span>Queued (Gray)</span></div>
+                        <div class="legend-item"><div class="legend-color" style="background: var(--color-explored); border: 2px solid var(--text-muted);"></div><span>Explored (Black)</span></div>
+                    </div>
+
                     <svg id="graph-svg" class="graph-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
                         <g id="edges-layer"></g>
                         <g id="nodes-layer"></g>
@@ -416,12 +431,18 @@
                     <input type="range" id="chart-slider" min="5" max="50" value="10" style="width: 200px; margin-left: 1rem;">
                 </div>
                 
-                <svg class="chart-svg" viewBox="0 -300 600 300"> 
+                <svg class="chart-svg" viewBox="0 -320 620 340"> 
                     <g transform="scale(1, -1)">
+                        <!-- Axes -->
+                        <line x1="50" y1="0" x2="600" y2="0" stroke="#888" stroke-width="2" />
+                        <line x1="50" y1="0" x2="50" y2="300" stroke="#888" stroke-width="2" />
+                        
+                        <!-- Lines -->
                         <path id="chart-path-dij" class="chart-line chart-line-dij"></path>
                         <path id="chart-path-bfs" class="chart-line chart-line-bfs"></path>
                         <path id="chart-path-actual" class="chart-line chart-line-actual"></path>
                         
+                        <!-- Points -->
                         <circle id="chart-dot-dij" class="chart-point" fill="var(--accent-alt)"></circle>
                         <circle id="chart-dot-bfs" class="chart-point" fill="var(--accent)"></circle>
                         <circle id="chart-dot-actual" class="chart-point" fill="#fff"></circle>
@@ -457,7 +478,8 @@
             
             <div class="key-concept-box" style="border-left-color: var(--accent-alt);">
                 <strong style="color: var(--accent-alt);">Counterexample: BFS vs DP (Bellman-Ford) on Weighted Graphs</strong>
-                Consider a graph A-C (cost 10), A-B (cost 1), and B-C (cost 1). If we use BFS to find the shortest path from A to C, it greedily sees the direct path A->C is only 1 edge and declares it the shortest. This is wrong (cost 10). A <strong>Dynamic Programming algorithm (Bellman-Ford)</strong> would correctly find the path A->B->C (cost 2).
+                Consider a graph A-C (cost 10), A-B (cost 1), and B-C (cost 1). If we use BFS to find the shortest path from A to C, it greedily sees the direct path A->C is only 1 edge and declares it the shortest. This is wrong (cost 10). A <strong>Dynamic Programming algorithm (Bellman-Ford)</strong> would correctly find the path A->B->C (cost 2). <br><br>
+                <em>(Click the <strong>Weighted (Fails)</strong> preset in the side panel to see this fail visually).</em>
             </div>
         </div>
 
@@ -483,12 +505,14 @@
         const presets = {
             standard: "A-B\nA-C\nB-D\nB-G\nC-G\nC-E\nD-F\nE-F\nG-D",
             tree: "A-B\nA-C\nB-D\nB-E\nC-F\nC-G",
-            dense: "A-B\nA-C\nA-D\nA-E\nB-C\nB-D\nB-E\nC-D\nC-E\nD-E" 
+            dense: "A-B\nA-C\nA-D\nA-E\nB-C\nB-D\nB-E\nC-D\nC-E\nD-E",
+            weighted: "A-B\nB-C\nA-C" 
         };
 
-        let graphData = { nodes: [], edges: [] };
+        let graphData = { nodes: [], edges: [], width: 800, height: 600 };
         let nodeLookup = {};
         let adjList = {};
+        let currentPreset = null; // Track current preset for UI styling
 
         // DOM Elements
         const edgesLayer = document.getElementById('edges-layer');
@@ -530,7 +554,8 @@
             const nodeSet = new Set();
             
             lines.forEach(line => {
-                const parts = line.split('-').map(s => s.trim().toUpperCase());
+                // UI Fix: Slice to max 3 characters to prevent SVG text spilling
+                const parts = line.split('-').map(s => s.trim().toUpperCase().slice(0, 3));
                 if (parts.length === 2 && parts[0] !== '' && parts[1] !== '') {
                     nodeSet.add(parts[0]);
                     nodeSet.add(parts[1]);
@@ -543,6 +568,8 @@
             const nodesList = Array.from(nodeSet).sort();
             
             let nodes;
+            let w = 800, h = 600;
+
             // Tree preset specific layout
             if (presetName === 'tree' && nodesList.join('') === "ABCDEFG") {
                  nodes = [
@@ -551,8 +578,15 @@
                     { id: 'E', x: 325, y: 400 }, { id: 'F', x: 475, y: 400 },
                     { id: 'G', x: 625, y: 400 }
                 ];
-            } else { // Default circular layout
-                const centerX = 400, centerY = 300, radius = 220;
+            } else { 
+                // UI Fix: Dynamic Radius & ViewBox based on graph size
+                const radius = Math.max(150, nodesList.length * 25);
+                const centerX = Math.max(400, radius + 100);
+                const centerY = Math.max(300, radius + 100);
+                
+                w = centerX * 2;
+                h = centerY * 2;
+
                 nodes = nodesList.map((id, index) => {
                     const angle = (index * (2 * Math.PI) / nodesList.length) - Math.PI/2;
                     return { id, x: centerX + radius * Math.cos(angle), y: centerY + radius * Math.sin(angle) };
@@ -561,7 +595,7 @@
             
             nodeLookup = {};
             nodes.forEach(n => nodeLookup[n.id] = n);
-            return { nodes, edges: uniqueEdges };
+            return { nodes, edges: uniqueEdges, width: w, height: h };
         }
         
         function buildAdjacencyList() {
@@ -574,13 +608,28 @@
             for (let key in adjList) adjList[key].sort(); 
         }
 
+        // Notify user if they typed something without applying
+        graphInput.addEventListener('input', () => {
+            btnApply.style.backgroundColor = 'var(--accent-alt)';
+            btnApply.style.color = '#000';
+            btnApply.textContent = 'Apply Changes!';
+        });
+
         function loadGraph(text, presetName = null) {
             resetApp();
+            currentPreset = presetName;
+            
+            // Reset button style
+            btnApply.style.backgroundColor = 'var(--panel-bg)';
+            btnApply.style.color = 'var(--accent)';
+            btnApply.style.border = '1px solid var(--accent)';
+            btnApply.textContent = 'Load Custom Graph';
+
             graphData = parseAndLayoutGraph(text, presetName);
             
             const V = graphData.nodes.length;
             const E = graphData.edges.length;
-            warningText.style.display = (V > 3 && E >= (V * (V - 1)) / 4) ? 'block' : 'none';
+            warningText.style.display = (V > 3 && E >= (V * (V - 1)) / 4 && presetName !== 'weighted') ? 'block' : 'none';
 
             buildAdjacencyList();
             renderInitialGraph();
@@ -592,6 +641,10 @@
            SVG RENDERING
            ========================================= */
         function renderInitialGraph() {
+            // Setup dynamic ViewBox
+            const svgEl = document.getElementById('graph-svg');
+            svgEl.setAttribute('viewBox', `0 0 ${graphData.width} ${graphData.height}`);
+
             edgesLayer.innerHTML = '';
             nodesLayer.innerHTML = '';
             
@@ -605,6 +658,21 @@
                 line.setAttribute('y2', nodeLookup[edge.target].y);
                 line.classList.add('edge');
                 edgesLayer.appendChild(line);
+
+                // CLO-3 Fix: Add mock weights if 'weighted' preset is active
+                if (currentPreset === 'weighted') {
+                    const weightVal = (s === 'A' && t === 'C') ? '10' : '1';
+                    const midX = (nodeLookup[s].x + nodeLookup[t].x) / 2;
+                    const midY = (nodeLookup[s].y + nodeLookup[t].y) / 2;
+                    const tEl = document.createElementNS(svgNS, 'text');
+                    tEl.setAttribute('x', midX);
+                    tEl.setAttribute('y', midY - 15);
+                    tEl.textContent = `Cost: ${weightVal}`;
+                    tEl.setAttribute('fill', 'var(--accent-alt)');
+                    tEl.setAttribute('font-weight', 'bold');
+                    tEl.setAttribute('text-anchor', 'middle');
+                    edgesLayer.appendChild(tEl);
+                }
             });
 
             graphData.nodes.forEach(node => {
@@ -761,12 +829,16 @@
         function renderHistoryTable(currentIndex) {
             historyBody.innerHTML = '';
             const startLimit = Math.max(0, currentIndex - 25);
+            let activeRow = null; // UI Fix: Track active row for auto-scroll
             
             for (let i = startLimit; i <= currentIndex; i++) {
                 const snap = snapshots[i];
                 const tr = document.createElement('tr');
                 tr.className = snap.actionClass;
-                if (i === currentIndex) tr.classList.add('active-history');
+                if (i === currentIndex) {
+                    tr.classList.add('active-history');
+                    activeRow = tr;
+                }
                 tr.innerHTML = `<td>${i}</td><td>${snap.logMsg}</td>`;
                 tr.onclick = () => {
                     pausePlayback();
@@ -776,7 +848,12 @@
                 };
                 historyBody.appendChild(tr);
             }
-            historyBox.scrollTop = historyBox.scrollHeight;
+            
+            if (activeRow) {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                historyBox.scrollTop = historyBox.scrollHeight;
+            }
         }
 
         function executeStep() { if (currentStep < snapshots.length - 1) { currentStep++; applySnapshot(currentStep); } }
@@ -819,6 +896,7 @@
         document.getElementById('preset-std').onclick = () => { graphInput.value = presets.standard; loadGraph(presets.standard, 'standard'); };
         document.getElementById('preset-tree').onclick = () => { graphInput.value = presets.tree; loadGraph(presets.tree, 'tree'); };
         document.getElementById('preset-dense').onclick = () => { graphInput.value = presets.dense; loadGraph(presets.dense, 'dense'); };
+        document.getElementById('preset-weighted').onclick = () => { graphInput.value = presets.weighted; loadGraph(presets.weighted, 'weighted'); };
         
         btnApply.onclick = () => loadGraph(graphInput.value, 'custom');
         
