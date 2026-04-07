@@ -55,18 +55,18 @@
         .app-container {
             display: flex;
             width: 100%;
-            height: 85vh;
-            min-height: 750px; /* Increased to better fit layout */
+            min-height: 85vh;
+            height: auto; /* CRITICAL: Allows left panel to fit its queue perfectly without leaking */
             border-bottom: 2px solid var(--border-color);
         }
 
+        /* 2. Left Panel: No internal scrolling, acts as the anchor for the section's height */
         .left-panel {
-            width: 420px; /* Strict width as per rubric */
+            width: 420px; 
             background-color: var(--panel-bg);
             display: flex;
             flex-direction: column;
             gap: 1.2rem;
-            overflow-y: auto;
             padding: 1.5rem;
             flex-shrink: 0;
             border-right: 1px solid var(--border-color);
@@ -76,8 +76,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            position: relative;
-            overflow: hidden;
+            min-width: 0;
+            min-height: 0; /* Flex lock */
             background-color: var(--bg-color);
         }
 
@@ -86,13 +86,16 @@
             .app-container { flex-direction: column; height: auto; }
             .left-panel, .right-panel { width: 100%; border: none; border-bottom: 1px solid var(--border-color); }
             .visualization-area { min-height: 500px; }
+            
+            /* ADD THIS LINE to restore standard flow on mobile: */
+            .right-panel-content { position: relative; flex-direction: column; }
         }
         
         /* Sub-layout for right panel content */
         .right-panel-content {
             display: flex;
             flex: 1;
-            min-height: 0; /* Fix for flexbox overflow */
+            min-height: 0; /* Flex lock */
             gap: 1.5rem;
             padding: 1.5rem;
         }
@@ -103,15 +106,19 @@
             gap: 1.2rem;
             flex: 1;
             min-width: 350px;
-            min-height: 0;
+            min-height: 0; /* Flex lock */
         }
 
         .code-and-history-container > .panel-section {
             min-height: 0; /* FIX 2/3: Tells the dark panels they can shrink */
         }
 
-        history-panel {
-            flex: 1;
+        #history-panel {
+            position: relative; /* Anchor point */
+            flex: 1; /* Takes up remaining vertical space below pseudocode */
+            display: flex;
+            flex-direction: column;
+            min-height: 200px; /* Safe fallback height */
         }
 
         /* =========================================
@@ -250,11 +257,12 @@
         }
 
         .history-container {
-            flex: 1; /* CRITICAL: Allows this div to grow and fill the available space in its flex parent. */
-            overflow-y: auto; /* CRITICAL: Adds a vertical scrollbar ONLY when content is taller than the container. */
-            min-height: 0; /* Prevents flexbox sizing issues. */
-            
-            /* Optional: Themed scrollbar for consistency with pseudocode box */
+            position: absolute;
+            top: 3.5rem; /* Leaves room for the "History Log" <h2> title */
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            overflow-y: auto; /* Scrolls internally */
             scrollbar-width: thin;
             scrollbar-color: var(--accent) transparent;
         }
@@ -949,9 +957,18 @@
             // Update pseudocode highlight
             document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active-line'));
             const activeCodeEl = document.getElementById(`line-${snap.activeLine}`);
+
             if (activeCodeEl) {
                 activeCodeEl.classList.add('active-line');
-                activeCodeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                const codeBox = document.getElementById('pseudocode-box');
+                if (codeBox) {
+                    // Scrolls only the code panel smoothly, preventing the entire page from jumping
+                    codeBox.scrollTo({
+                        top: activeCodeEl.offsetTop - 40, 
+                        behavior: 'smooth'
+                    });
+                }
             }
 
             renderHistoryTable(index);
