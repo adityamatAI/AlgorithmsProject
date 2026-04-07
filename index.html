@@ -1140,36 +1140,50 @@
             document.getElementById('chart-v-val').textContent = V;
             
             const E = (V * (V - 1)) / 2;
-            const bfsOp = V + E;
-            const actualOp = runHiddenBfs(V);
-            const dijOp = Math.round((V + E) * Math.log2(V));
-
-            document.getElementById('chart-op-actual').textContent = actualOp;
-            document.getElementById('chart-op-bfs').textContent = bfsOp;
-            document.getElementById('chart-op-dij').textContent = dijOp;
             
-            let pathBFS = "M 60 0 "; let pathDij = "M 60 0 "; let pathActual = "M 60 0 ";
+            // Group operations into a dictionary object
+            const ops = {
+                actual: runHiddenBfs(V),
+                bfs: V + E,
+                dij: Math.round((V + E) * Math.log2(V))
+            };
+
+            document.getElementById('chart-op-actual').textContent = ops.actual;
+            document.getElementById('chart-op-bfs').textContent = ops.bfs;
+            document.getElementById('chart-op-dij').textContent = ops.dij;
+            
+            // Group paths into a dictionary object
+            const paths = {
+                actual: "M 60 0 ",
+                bfs: "M 60 0 ",
+                dij: "M 60 0 "
+            };
+            
             const scaleY = 300 / (7500); // Scale based on max Dijkstra ops
             const scaleX = 540 / 45; // 600-60 / 50-5
             
             for(let v_idx = 0; v_idx <= 45; v_idx++) {
                 let v = v_idx + 5;
                 let e = (v * (v - 1)) / 2;
+                let opActual = actualDataPoints[v_idx];
                 let opBfs = v + e;
                 let opDij = (v + e) * Math.log2(v);
-                let opActual = actualDataPoints[v_idx];
                 
                 const x = v_idx * scaleX + 60;
-                pathActual += `L ${x} ${opActual * scaleY} `;
-                pathBFS += `L ${x} ${opBfs * scaleY} `;
-                pathDij += `L ${x} ${opDij * scaleY} `;
+                
+                // Safely append to paths without using eval()
+                paths.actual += `L ${x} ${opActual * scaleY} `;
+                paths.bfs += `L ${x} ${opBfs * scaleY} `;
+                paths.dij += `L ${x} ${opDij * scaleY} `;
             }
             
             const currentX = (V - 5) * scaleX + 60;
+            
+            // Apply attributes cleanly using object bracket notation
             ['actual', 'bfs', 'dij'].forEach(type => {
-                document.getElementById(`chart-path-${type}`).setAttribute('d', eval(`path${type.charAt(0).toUpperCase() + type.slice(1)}`));
+                document.getElementById(`chart-path-${type}`).setAttribute('d', paths[type]);
                 document.getElementById(`chart-dot-${type}`).setAttribute('cx', currentX);
-                document.getElementById(`chart-dot-${type}`).setAttribute('cy', eval(`${type}Op`) * scaleY);
+                document.getElementById(`chart-dot-${type}`).setAttribute('cy', ops[type] * scaleY);
             });
         }
         chartSlider.addEventListener('input', drawChart);
